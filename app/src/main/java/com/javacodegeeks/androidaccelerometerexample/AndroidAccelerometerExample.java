@@ -47,7 +47,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 		} else {
 			// fai! we dont have an accelerometer!
 		}
-		
+
 		//initialize vibration
 		v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -122,9 +122,9 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 	// display the current x,y,z accelerometer values
 	public void displayCurrentValues() {
-		currentX.setText(Float.toString(deltaX));
-		currentY.setText(Float.toString(deltaY));
-		currentZ.setText(Float.toString(deltaZ));
+		currentX.setText(Float.toString(lastX));
+		currentY.setText(Float.toString(lastY));
+		currentZ.setText(Float.toString(lastZ));
 	}
 
 	// display the max x,y,z accelerometer values
