@@ -8,6 +8,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -53,7 +54,9 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         count = 0;
 
-	}
+//        SmsManager.getDefault().sendTextMessage("5125778778", null, "this is a test message", null,null);
+
+    }
 
     private float maxAccelDifference(float[] current) {
         float ret = 0;
