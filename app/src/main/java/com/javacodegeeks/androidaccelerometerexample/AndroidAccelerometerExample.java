@@ -20,8 +20,12 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	private SensorManager sensorManager;
 	private Sensor accelerometer;
 
-
+    private static final int MAX_NOTIFY_DELTA = 20 * 1000; // 20 seconds
+    private static final int MIN_NOTIFY_DELTA = 5 * 1000; // 20 seconds
+    private static final int TWO_MINUTES = 2 * 60 * 1000; // 20 seconds
+    public long last_notify = 0;
     private Queue<float[]> sensorEventQueue;
+    public Queue<Long> movementTimesQueue; // TODO make private
 
 	private float vibrateThreshold = 0;
 
@@ -53,6 +57,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 		v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
         count = 0;
+        movementTimesQueue = new LinkedList<Long>();
 
 //        SmsManager.getDefault().sendTextMessage("5125778778", null, "this is a test message", null,null);
 
@@ -102,12 +107,32 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 		maybeVibrate(current);
 	}
 
+    public boolean shouldNotify(long millis) {
+        movementTimesQueue.add(millis);
+
+        // clear queue
+        while (movementTimesQueue.peek() != null && movementTimesQueue.peek() < millis - MAX_NOTIFY_DELTA) {
+            movementTimesQueue.remove();
+        }
+
+        if (movementTimesQueue.peek() < millis - MIN_NOTIFY_DELTA) {
+            if (millis - last_notify > TWO_MINUTES) {
+                last_notify = millis;
+                return true;
+            }
+        }
+        return false;
+    }
+
 	// if the change in the accelerometer value is big enough, then vibrate!
 	// our threshold is MaxValue/2
 	public void maybeVibrate(float[] current) {
 
 
         if (maxAccelDifference(current) > vibrateThreshold) {
+            if (shouldNotify(System.currentTimeMillis())) {
+                Log.d("mine", "Actual notify!");
+            }
 //            v.vibrate(50);
             Log.d("mine", "Diff is great enough!");
             sensorEventQueue.clear();
