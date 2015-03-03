@@ -8,31 +8,31 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.util.Log;
 import android.widget.TextView;
 
-public class AndroidAccelerometerExample extends Activity implements SensorEventListener {
+import java.util.LinkedList;
+import java.util.Queue;
 
-	private float lastX, lastY, lastZ;
+public class AndroidAccelerometerExample extends Activity implements SensorEventListener {
 
 	private SensorManager sensorManager;
 	private Sensor accelerometer;
 
-	private float deltaXMax = 0;
-	private float deltaYMax = 0;
-	private float deltaZMax = 0;
 
-	private float deltaX = 0;
-	private float deltaY = 0;
-	private float deltaZ = 0;
+    private Queue<float[]> sensorEventQueue;
 
 	private float vibrateThreshold = 0;
 
-	private TextView currentX, currentY, currentZ, maxX, maxY, maxZ;
+    private int count;
+
+	private TextView currentX, currentY, currentZ, countView;
 
 	public Vibrator v;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+        sensorEventQueue = new LinkedList<float[]>();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		initializeViews();
@@ -43,24 +43,35 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 			accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 			sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-			vibrateThreshold = accelerometer.getMaximumRange() / 10;
+			vibrateThreshold = accelerometer.getMaximumRange() / 50;
 		} else {
-			// fai! we dont have an accelerometer!
+			// fail! we dont have an accelerometer!
 		}
 
 		//initialize vibration
 		v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
+        count = 0;
+
 	}
+
+    private float maxAccelDifference(float[] current) {
+        float ret = 0;
+        for (float[] arr : sensorEventQueue) {
+            ret = Math.max(ret, (float) Math.sqrt(
+                        Math.pow(arr[0] - current[0], 2) +
+                        Math.pow(arr[1] - current[1], 2) +
+                        Math.pow(arr[2] - current[2], 2)));
+        }
+        return ret;
+    }
 
 	public void initializeViews() {
 		currentX = (TextView) findViewById(R.id.currentX);
 		currentY = (TextView) findViewById(R.id.currentY);
 		currentZ = (TextView) findViewById(R.id.currentZ);
+        countView = (TextView) findViewById(R.id.count);
 
-		maxX = (TextView) findViewById(R.id.maxX);
-		maxY = (TextView) findViewById(R.id.maxY);
-		maxZ = (TextView) findViewById(R.id.maxZ);
 	}
 
 	////onResume() register the accelerometer for listening the events
@@ -82,64 +93,36 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-
-		// clean current values
-		displayCleanValues();
-		// display the current x,y,z accelerometer values
-		displayCurrentValues();
-		// display the max x,y,z accelerometer values
-		displayMaxValues();
-
-		// get the change of the x,y,z values of the accelerometer
-		deltaX = Math.abs(lastX - event.values[0]);
-		deltaY = Math.abs(lastY - event.values[1]);
-		deltaZ = Math.abs(lastZ - event.values[2]);
-
-		// if the change is below 2, it is just plain noise
-
-		// set the last know values of x,y,z
-		lastX = event.values[0];
-		lastY = event.values[1];
-		lastZ = event.values[2];
-
-		vibrate();
-
+        count += 1;
+        float[] current = {event.values[0], event.values[1], event.values[2]};
+        displayCurrentValues(current);
+		maybeVibrate(current);
 	}
 
 	// if the change in the accelerometer value is big enough, then vibrate!
 	// our threshold is MaxValue/2
-	public void vibrate() {
-		if ((deltaX > vibrateThreshold) || (deltaY > vibrateThreshold) || (deltaZ > vibrateThreshold)) {
-			v.vibrate(50);
-		}
-	}
+	public void maybeVibrate(float[] current) {
 
-	public void displayCleanValues() {
-		currentX.setText("0.0");
-		currentY.setText("0.0");
-		currentZ.setText("0.0");
-	}
 
+        if (maxAccelDifference(current) > vibrateThreshold) {
+//            v.vibrate(50);
+            Log.d("mine", "Diff is great enough!");
+            sensorEventQueue.clear();
+        }
+        sensorEventQueue.add(current);
+        if (sensorEventQueue.size() > 100) {
+            sensorEventQueue.remove();
+        }
+
+	}
 	// display the current x,y,z accelerometer values
-	public void displayCurrentValues() {
-		currentX.setText(Float.toString(lastX));
-		currentY.setText(Float.toString(lastY));
-		currentZ.setText(Float.toString(lastZ));
+	public void displayCurrentValues(float[] current) {
+
+		currentX.setText(Float.toString(current[0]));
+		currentY.setText(Float.toString(current[1]));
+		currentZ.setText(Float.toString(current[2]));
+
+        countView.setText(Integer.toString(count));
 	}
 
-	// display the max x,y,z accelerometer values
-	public void displayMaxValues() {
-		if (deltaX > deltaXMax) {
-			deltaXMax = deltaX;
-			maxX.setText(Float.toString(deltaXMax));
-		}
-		if (deltaY > deltaYMax) {
-			deltaYMax = deltaY;
-			maxY.setText(Float.toString(deltaYMax));
-		}
-		if (deltaZ > deltaZMax) {
-			deltaZMax = deltaZ;
-			maxZ.setText(Float.toString(deltaZMax));
-		}
-	}
 }
