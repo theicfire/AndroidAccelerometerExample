@@ -11,7 +11,9 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.Date;
@@ -23,14 +25,19 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	private SensorManager sensorManager;
 	private Sensor accelerometer;
 
-    private static final int MAX_NOTIFY_DELTA = 20 * 1000;
-    private static final int MIN_NOTIFY_DELTA = 5 * 1000;
-    private static final int TWO_MINUTES = 40 * 1000;
+    private static int MAX_NOTIFY_DELTA = 20 * 1000;
+    private static int MIN_NOTIFY_DELTA = 5 * 1000;
+    private static int MIN_SMS_DELAY = 40 * 1000;
     public long last_notify = 0;
     private Queue<float[]> sensorEventQueue;
     public Queue<Long> movementTimesQueue; // TODO make private
 
-	private float vibrateThreshold = 0;
+    EditText minNotifyView;
+    EditText maxNotifyView;
+    EditText minSMSDelay;
+
+
+    private float vibrateThreshold = 0;
     private Handler mHandler;
 
     private int count;
@@ -64,15 +71,57 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         movementTimesQueue = new LinkedList<Long>();
 
         setupTimeUpdate();
+        setupSettings();
+    }
 
+    private void setupSettings() {
+        minNotifyView = (EditText) findViewById(R.id.minNotifyView);
+        minNotifyView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    updateSettings();
+                }
+            }
+        });
+
+        maxNotifyView = (EditText) findViewById(R.id.maxNotifyView);
+        maxNotifyView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    updateSettings();
+                }
+            }
+        });
+        minSMSDelay = (EditText) findViewById(R.id.minSMSDelay);
+        minSMSDelay.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    updateSettings();
+                }
+            }
+        });
+        updateSettings();
+    }
+
+    private void updateSettings() {
+        MIN_NOTIFY_DELTA = Integer.valueOf(minNotifyView.getText().toString()) * 1000;
+        Log.d("mine", "min notify is" + MIN_NOTIFY_DELTA);
+        MAX_NOTIFY_DELTA = Integer.valueOf(maxNotifyView.getText().toString()) * 1000;
+        Log.d("mine", "max" + MAX_NOTIFY_DELTA);
+
+        MIN_SMS_DELAY = Integer.valueOf(minSMSDelay.getText().toString()) * 1000;
+        Log.d("mine", "sms" + MIN_SMS_DELAY);
 
     }
 
     private String timeTillSMSAllowed() {
-        if (System.currentTimeMillis() - last_notify > TWO_MINUTES) {
+        if (System.currentTimeMillis() - last_notify > MIN_SMS_DELAY) {
             return "0";
         }
-        return Long.toString((TWO_MINUTES - (System.currentTimeMillis() - last_notify)) / 1000);
+        return Long.toString((MIN_SMS_DELAY - (System.currentTimeMillis() - last_notify)) / 1000);
     }
 
     private void updateNotifyTimeRangeView() {
@@ -170,7 +219,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         }
 
         if (movementTimesQueue.peek() != null && movementTimesQueue.peek() < millis - MIN_NOTIFY_DELTA) {
-            if (millis - last_notify > TWO_MINUTES) {
+            if (millis - last_notify > MIN_SMS_DELAY) {
                 return true;
             }
         }
