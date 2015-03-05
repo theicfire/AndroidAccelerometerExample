@@ -24,11 +24,15 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +50,10 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     public long last_notify = 0;
     private Queue<float[]> sensorEventQueue;
     public Queue<Long> movementTimesQueue; // TODO make private
+
+    private float[][] accelsToSend;
+    private long[] accelsToSendTime;
+    private static final int ACCELS_TO_SEND_LENGTH = 10;
 
     EditText minNotifyView;
     EditText maxNotifyView;
@@ -87,7 +95,10 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         setupTimeUpdate();
         setupSettings();
-        new MyAsyncTask().execute("10", "11", "12");
+
+
+        accelsToSend = new float[10][3];
+        accelsToSendTime = new long[10];
 
     }
 
@@ -161,7 +172,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
                             @Override
                             public void run() {
-                                Log.d("mine", "come very 1 second");
                                 timeTillSMSAllowedView.setText(timeTillSMSAllowed());
                                 updateNotifyTimeRangeView();
 
@@ -214,9 +224,20 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-        count += 1;
-        countView.setText(Integer.toString(count));
         float[] current = {event.values[0], event.values[1], event.values[2]};
+        accelsToSend[count % 10][0] = event.values[0];
+        accelsToSend[count % 10][1] = event.values[1];
+        accelsToSend[count % 10][2] = event.values[2];
+        accelsToSendTime[count % 10] = System.currentTimeMillis();
+        Log.d("mine", "time" + accelsToSendTime[count % 10]);
+
+        count += 1;
+        if (count % 10 == 0) {
+            Log.d("mine", accelsToJSON());
+            new MyAsyncTask().execute(accelsToJSON());
+//            Arrays.fill(accelsToSend, (float) 0);
+        }
+        countView.setText(Integer.toString(count));
 		maybeVibrate(current);
 	}
 
@@ -269,25 +290,46 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 	}
 
+    private String accelsToJSON() {
+        JSONArray ret = new JSONArray();
+        for (int i = 0; i < accelsToSend.length; i++) {
+            JSONArray toAdd = new JSONArray();
+            for (float n : accelsToSend[i]) {
+                try {
+                    toAdd.put((double) n);
+                } catch (JSONException e) {
+                    Log.d("mine", "BAD JSON");
+                }
+
+            }
+            toAdd.put(accelsToSendTime[i]);
+            ret.put(toAdd);
+        }
+        return ret.toString();
+    }
+
     private class MyAsyncTask extends AsyncTask<String, Integer, String> {
 
         @Override
         protected String doInBackground(String... params) {
-            postData(params[0], params[1], params[2]);
+            postData(params[0]);
             return null;
         }
 
-        public void postData(String x, String y, String z) {
-            // Create a new HttpClient and Post Header
-            HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost("http://chasetodo.meteor.com/accels/" + x + "/" + y + "/" + z);
-
+        public void postData(String json) {
+            HttpClient httpClient = new DefaultHttpClient();
             try {
-                httpclient.execute(httppost);
-            } catch (ClientProtocolException e) {
-                Log.d("mine", "bad internet");
-            } catch (IOException e) {
-                Log.d("mine", "bad internet");
+                HttpPost request = new HttpPost("http://chasetodo.meteor.com/multi_accels");
+                StringEntity params =new StringEntity(json);
+                request.addHeader("content-type", "application/json");
+                request.setEntity(params);
+                HttpResponse response = httpClient.execute(request);
+
+                // handle response here...
+            }catch (Exception ex) {
+                // handle exception here
+            } finally {
+                httpClient.getConnectionManager().shutdown();
             }
         }
 
