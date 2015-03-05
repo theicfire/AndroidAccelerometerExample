@@ -229,12 +229,13 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         accelsToSend[count % 10][1] = event.values[1];
         accelsToSend[count % 10][2] = event.values[2];
         accelsToSendTime[count % 10] = System.currentTimeMillis();
-        Log.d("mine", "time" + accelsToSendTime[count % 10]);
+//        Log.d("mine", "time" + accelsToSendTime[count % 10]);
 
         count += 1;
         if (count % 10 == 0) {
             Log.d("mine", accelsToJSON());
-            new MyAsyncTask().execute(accelsToJSON());
+            Log.d("mine", "Attempt to send at count " + count);
+            new MyAsyncTask().execute(accelsToJSON(), Integer.toString(count));
 //            Arrays.fill(accelsToSend, (float) 0);
         }
         countView.setText(Integer.toString(count));
@@ -312,22 +313,25 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         @Override
         protected String doInBackground(String... params) {
-            postData(params[0]);
+            postData(params[0], params[1]);
             return null;
         }
 
-        public void postData(String json) {
+        public void postData(String json, String count) {
             HttpClient httpClient = new DefaultHttpClient();
             try {
-                HttpPost request = new HttpPost("http://chasetodo.meteor.com/multi_accels");
+                HttpPost request = new HttpPost("https://paetwmjyqv.localtunnel.me/multi_accels");
                 StringEntity params =new StringEntity(json);
                 request.addHeader("content-type", "application/json");
                 request.setEntity(params);
                 HttpResponse response = httpClient.execute(request);
+//                response.getStatusLine().getStatusCode();
+                Log.d("mine", "SUCCESS request for count " + count);
 
                 // handle response here...
             }catch (Exception ex) {
                 // handle exception here
+                Log.d("mine", "FAILED request");
             } finally {
                 httpClient.getConnectionManager().shutdown();
             }
