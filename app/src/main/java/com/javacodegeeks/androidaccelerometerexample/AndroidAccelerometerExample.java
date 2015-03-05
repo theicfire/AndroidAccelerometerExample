@@ -2,10 +2,12 @@ package com.javacodegeeks.androidaccelerometerexample;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -16,9 +18,22 @@ import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+
 
 public class AndroidAccelerometerExample extends Activity implements SensorEventListener {
 
@@ -72,6 +87,8 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         setupTimeUpdate();
         setupSettings();
+        new MyAsyncTask().execute("10", "11", "12");
+
     }
 
     private void setupSettings() {
@@ -113,7 +130,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         Log.d("mine", "max" + MAX_NOTIFY_DELTA);
 
         MIN_SMS_DELAY = Integer.valueOf(minSMSDelay.getText().toString()) * 1000;
-        Log.d("mine", "sms" + MIN_SMS_DELAY);
+        Log.d("mine", "sms is " + MIN_SMS_DELAY);
 
     }
 
@@ -251,4 +268,28 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         }
 
 	}
+
+    private class MyAsyncTask extends AsyncTask<String, Integer, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            postData(params[0], params[1], params[2]);
+            return null;
+        }
+
+        public void postData(String x, String y, String z) {
+            // Create a new HttpClient and Post Header
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httppost = new HttpPost("http://chasetodo.meteor.com/accels/" + x + "/" + y + "/" + z);
+
+            try {
+                httpclient.execute(httppost);
+            } catch (ClientProtocolException e) {
+                Log.d("mine", "bad internet");
+            } catch (IOException e) {
+                Log.d("mine", "bad internet");
+            }
+        }
+
+    }
 }
