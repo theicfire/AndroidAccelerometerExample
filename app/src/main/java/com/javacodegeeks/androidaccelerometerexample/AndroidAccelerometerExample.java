@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +37,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 
 
@@ -68,8 +70,10 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	private TextView countView, timeTillSMSAllowedView, notifyTimeRangeView;
 
 	public Vibrator v;
+    TextToSpeech ttobj;
 
-	@Override
+
+    @Override
 	public void onCreate(Bundle savedInstanceState) {
         sensorEventQueue = new LinkedList<float[]>();
 		super.onCreate(savedInstanceState);
@@ -99,6 +103,24 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         accelsToSend = new float[10][3];
         accelsToSendTime = new long[10];
+
+        ttobj=new TextToSpeech(getApplicationContext(),
+                new TextToSpeech.OnInitListener() {
+                    @Override
+                    public void onInit(int status) {
+                        if(status != TextToSpeech.ERROR){
+                            ttobj.setLanguage(Locale.UK);
+                        }
+                    }
+                });
+
+    }
+
+    public void speakText(String toSpeak){
+
+        Toast.makeText(getApplicationContext(), toSpeak,
+                Toast.LENGTH_SHORT).show();
+        ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
 
     }
 
@@ -273,6 +295,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         if (maxAccelDifference(current) > vibrateThreshold) {
             if (shouldNotify(System.currentTimeMillis())) {
                 Log.d("mine", "Actual notify. Sending sms!");
+                speakText("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.");
                 Date date = new Date();
 
                 SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
