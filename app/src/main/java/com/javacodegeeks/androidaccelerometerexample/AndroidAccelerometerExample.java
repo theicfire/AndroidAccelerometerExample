@@ -277,7 +277,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 ////            Arrays.fill(accelsToSend, (float) 0);
 //        }
         countView.setText(Integer.toString(count));
-//		maybeVibrate(current);
+//		maybeVibrate(current); // TODO bring back
 	}
 
     public boolean shouldNotify(long millis) {
