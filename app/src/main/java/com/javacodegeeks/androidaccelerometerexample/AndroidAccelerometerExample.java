@@ -347,7 +347,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                     HttpClient httpClient = new DefaultHttpClient();
                     try {
 
-                        HttpPost request = new HttpPost("http://chasetodo.meteor.com/hitter/" + System.currentTimeMillis());
+                        HttpPost request = new HttpPost("http://chasetodo.meteor.com/multi_accels/");
                         Log.d("mine", "get JSON");
                         StringEntity params = new StringEntity(accelsToJSON());
                         Log.d("mine", "got JSON");
@@ -380,8 +380,13 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                         Log.d("mine", "connected, sending data");
                         Map<String, Object> insertValues = new HashMap<String, Object>();
 //        insertValues.put("_id", "my-key");
-                        insertValues.put("androidTime", 3);
+                        insertValues.put("androidTime", System.currentTimeMillis());
                         mMeteor.insert("hitters", insertValues);
+                        try {
+                            Thread.sleep(500);
+                        } catch(InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                        }
 
                         Log.d("mine", "done sending data");
                     }
