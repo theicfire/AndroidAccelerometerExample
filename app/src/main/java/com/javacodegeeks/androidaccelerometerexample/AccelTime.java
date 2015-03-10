@@ -13,6 +13,7 @@ public class AccelTime {
     private float y;
     private float z;
     private long time;
+
     public AccelTime(float x, float y, float z, long time) {
         this.x = x;
         this.y = y;

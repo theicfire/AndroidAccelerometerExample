@@ -22,13 +22,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 public class AndroidAccelerometerExample extends Activity implements SensorEventListener {
@@ -42,8 +40,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     public long last_notify = 0;
     private Queue<float[]> sensorEventQueue;
     public Queue<Long> movementTimesQueue; // TODO make private
-
-    private ConcurrentLinkedQueue<AccelTime> accelsToSend;
 
     EditText minNotifyView;
     EditText maxNotifyView;
@@ -61,8 +57,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     TextToSpeech ttobj;
     private MyMeteor mMeteor;
 
-    private boolean meteorConnected = false;
-
+    private AccelQueue accelQueue;
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -91,8 +86,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         setupTimeUpdate();
         setupSettings();
 
-
-        accelsToSend = new ConcurrentLinkedQueue<AccelTime>();
+        accelQueue = new AccelQueue();
 
         ttobj=new TextToSpeech(getApplicationContext(),
                 new TextToSpeech.OnInitListener() {
@@ -241,7 +235,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	@Override
 	public void onSensorChanged(SensorEvent event) {
         float[] current = {event.values[0], event.values[1], event.values[2]};
-        accelsToSend.add(new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
+        accelQueue.accelsToSend.add(new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
 
         count += 1;
 //        if (count % 10 == 0) {
@@ -279,8 +273,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         // if the change in the accelerometer value is big enough, then vibrate!
 	// our threshold is MaxValue/2
 	public void maybeVibrate(float[] current) {
-
-
         if (maxAccelDifference(current) > vibrateThreshold) {
             if (shouldNotify(System.currentTimeMillis())) {
                 Log.d("mine", "Actual notify. Sending sms!");
@@ -303,14 +295,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 	}
 
-    private String accelsToJSON() {
-        JSONArray ret = new JSONArray();
-        while (! accelsToSend.isEmpty()) {
-            ret.put(accelsToSend.poll().toJSON());
-        }
-        return ret.toString();
-    }
-
     private void startSendingServerData() {
         Thread thread = new Thread(new Runnable(){
             @Override
@@ -322,7 +306,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
                         HttpPost request = new HttpPost("http://chasetodo.meteor.com/multi_accels/");
                         Log.d("mine", "get JSON");
-                        StringEntity params = new StringEntity(accelsToJSON());
+                        StringEntity params = new StringEntity(accelQueue.accelsToJSON());
                         Log.d("mine", "got JSON");
                         request.addHeader("content-type", "application/json");
                         request.setEntity(params);
@@ -342,8 +326,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         });
         thread.start();
     }
-
-
 
     @Override
     public void onDestroy() {
