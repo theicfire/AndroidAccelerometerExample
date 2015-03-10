@@ -54,7 +54,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	private TextView countView, timeTillSMSAllowedView, notifyTimeRangeView;
 
 	public Vibrator v;
-    TextToSpeech ttobj;
+    UKTextToSpeech ttobj;
     private MyMeteor mMeteor;
 
     private AccelQueue accelQueue;
@@ -88,29 +88,13 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         accelQueue = new AccelQueue();
 
-        ttobj=new TextToSpeech(getApplicationContext(),
-                new TextToSpeech.OnInitListener() {
-                    @Override
-                    public void onInit(int status) {
-                        if(status != TextToSpeech.ERROR){
-                            ttobj.setLanguage(Locale.UK);
-                        }
-                    }
-                });
-
+        ttobj = new UKTextToSpeech(getApplicationContext());
 
 //      startSendingServerData();
         mMeteor = new MyMeteor();
         mMeteor.startSending();
     }
 
-    public void speakText(String toSpeak){
-
-        Toast.makeText(getApplicationContext(), toSpeak,
-                Toast.LENGTH_SHORT).show();
-        ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
-
-    }
 
     private void setupSettings() {
         minNotifyView = (EditText) findViewById(R.id.minNotifyView);
@@ -276,7 +260,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         if (maxAccelDifference(current) > vibrateThreshold) {
             if (shouldNotify(System.currentTimeMillis())) {
                 Log.d("mine", "Actual notify. Sending sms!");
-                speakText("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.");
+                ttobj.speakText("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.");
                 Date date = new Date();
 
                 SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
