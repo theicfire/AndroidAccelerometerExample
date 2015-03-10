@@ -28,6 +28,12 @@ import android.util.Log;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.javacodegeeks.androidaccelerometerexample.UKTextToSpeech;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import java.util.Locale;
 
 /**
@@ -78,6 +84,7 @@ public class GcmIntentService extends IntentService {
                                 if(status != TextToSpeech.ERROR){
                                     ttobj.setLanguage(Locale.UK);
                                     ttobj.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+                                    sendTTSReceived();
                                 }
                             }
                         });
@@ -87,5 +94,26 @@ public class GcmIntentService extends IntentService {
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
         GcmBroadcastReceiver.completeWakefulIntent(intent);
+    }
+
+    private void sendTTSReceived() {
+        Thread thread = new Thread(new Runnable(){
+            @Override
+            public void run(){
+                //code to do the HTTP request
+                    HttpClient httpClient = new DefaultHttpClient();
+                    try {
+                        HttpPost request = new HttpPost("http://chaselambda.com:3000/tts-received");
+                        request.addHeader("content-type", "application/json");
+                        httpClient.execute(request);
+                    } catch (Exception ex) {
+                        // handle exception here
+                        Log.d("mine", "FAILED request");
+                    } finally {
+                        httpClient.getConnectionManager().shutdown();
+                    }
+            }
+        });
+        thread.start();
     }
 }
