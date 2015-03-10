@@ -1,4 +1,4 @@
-package com.javacodegeeks.androidaccelerometerexample.test;
+package com.javacodegeeks.androidaccelerometerexample;
 
 import android.util.Log;
 
