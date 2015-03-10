@@ -15,6 +15,7 @@ public class AccelQueue {
     }
 
     public String accelsToJSON() {
+//        return "{\"time\":" + System.currentTimeMillis() + "}";
         JSONArray ret = new JSONArray();
         while (! accelsToSend.isEmpty()) {
             ret.put(accelsToSend.poll().toJSON());

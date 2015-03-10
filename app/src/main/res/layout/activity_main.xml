@@ -27,7 +27,7 @@
             android:ems="10"
             android:id="@+id/minNotifyView"
             android:hint="Min time between texts"
-            android:text="5"
+            android:text="1"
             android:layout_weight="0.55" />
     </LinearLayout>
 
@@ -51,7 +51,7 @@
             android:ems="10"
             android:id="@+id/maxNotifyView"
             android:hint="Min time between texts"
-            android:text="20"
+            android:text="10"
             android:layout_weight="1.16" />
     </LinearLayout>
     <LinearLayout
@@ -74,7 +74,7 @@
             android:ems="10"
             android:id="@+id/minSMSDelay"
             android:hint="Min time between texts"
-            android:text="120"
+            android:text="30"
             android:layout_weight="0.34" />
     </LinearLayout>
 

@@ -14,10 +14,12 @@ import im.delight.android.ddp.MeteorCallback;
 public class MyMeteor implements MeteorCallback {
     public boolean meteorConnected = false;
     public Meteor mMeteor;
+    public long lastVibrate;
 
     public MyMeteor() {
         mMeteor = new Meteor("ws://chasetodo.meteor.com/websocket");
         mMeteor.setCallback(this);
+        lastVibrate = 0;
     }
 
 

@@ -228,13 +228,12 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 ////            Arrays.fill(accelsToSend, (float) 0);
 //        }
         countView.setText(Integer.toString(count));
-//		maybeVibrate(current); // TODO bring back
+		maybeVibrate(current); // TODO bring back
 	}
 
     public boolean shouldNotify(long millis) {
         movementTimesQueue.add(millis);
         if (shouldNotifyIfAdded(millis)) {
-            last_notify = millis;
             return true;
         }
         return false;
@@ -258,13 +257,15 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	// our threshold is MaxValue/2
 	public void maybeVibrate(float[] current) {
         if (maxAccelDifference(current) > vibrateThreshold) {
-            if (shouldNotify(System.currentTimeMillis())) {
+            long curTime = System.currentTimeMillis();
+            if (shouldNotify(curTime)) {
                 Log.d("mine", "Actual notify. Sending sms!");
-                ttobj.speakText("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.");
-                Date date = new Date();
-
-                SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
-                Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
+                last_notify = curTime;
+//                ttobj.speakText("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.");
+//                Date date = new Date();
+//
+//                SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
+//                Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
             }
             updateNotifyTimeRangeView();
 
@@ -323,7 +324,8 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             public void run(){
                 //code to do the HTTP request
                 while (true) {
-                    if (mMeteor.meteorConnected) {
+                    long curTime = System.currentTimeMillis();
+                    if (mMeteor.meteorConnected && curTime - last_notify < MIN_SMS_DELAY) {
                         Log.d("mine", "connected, sending data");
                         Map<String, Object> insertValues = new HashMap<String, Object>();
                         insertValues.put("accelsJson", accelQueue.accelsToJSON());
