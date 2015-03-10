@@ -17,7 +17,7 @@ public class MyMeteor implements MeteorCallback {
     public boolean didDisconnect;
 
     public MyMeteor() {
-        mMeteor = new Meteor("ws://chasetodo.meteor.com/websocket");
+        mMeteor = new Meteor("ws://chaselambda.com:3000/websocket");
         mMeteor.setCallback(this);
         meteorConnected = false;
         didDisconnect = false;

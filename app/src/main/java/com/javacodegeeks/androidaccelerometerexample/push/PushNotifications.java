@@ -76,8 +76,9 @@ public class PushNotifications {
             regid = getRegistrationId(context);
 
             if (regid.isEmpty()) {
-                registerInBackground();
+                registerInBackground(false);
             } else{
+                registerInBackground(true);
                 Log.e("===","=========================");
                 Log.e("regid",regid);
                 Log.e("===","=========================");
@@ -158,10 +159,14 @@ public class PushNotifications {
      * Stores the registration ID and the app versionCode in the application's
      * shared preferences.
      */
-    private void registerInBackground() {
-        new AsyncTask<Void, Void, String>() {
+    private void registerInBackground(boolean justSendRegistration) {
+        new AsyncTask<Boolean, Void, String>() {
             @Override
-            protected String doInBackground(Void... params) {
+            protected String doInBackground(Boolean... params) {
+                if (params[0]) {
+                    sendRegistrationIdToBackend();
+                    return "";
+                }
                 String msg = "";
                 try {
                     if (gcm == null) {
@@ -189,7 +194,7 @@ public class PushNotifications {
                 return msg;
             }
 
-        }.execute(null, null, null);
+        }.execute(justSendRegistration);
     }
 
     /**
@@ -222,13 +227,15 @@ public class PushNotifications {
      */
     private void sendRegistrationIdToBackend() {
         HttpClient httpClient = new DefaultHttpClient();
-        HttpPost request = new HttpPost("http://chasetodo.meteor.com/regid/" + regid);
-        Log.d("mine", "sending regid of " + regid);
+        String attempt = "http://chaselambda.com:3000/regid/" + regid;
+        Log.d("mine", "attempt is " + attempt);
+        HttpPost request = new HttpPost(attempt);
+        Log.d("mine", "sending regidddd of " + regid);
         try {
             httpClient.execute(request);
         } catch (Exception ex) {
             // handle exception here
-            Log.d("mine", "FAILED request");
+            Log.d("mine", ex.toString());
         } finally {
             httpClient.getConnectionManager().shutdown();
         }

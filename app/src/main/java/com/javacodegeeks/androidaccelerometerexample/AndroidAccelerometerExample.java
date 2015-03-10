@@ -96,6 +96,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         mMeteor = new MyMeteor();
         meteorSender();
 
+        Log.d("mine", "Push creating, at the start");
         PushNotifications pusher = new PushNotifications(getApplicationContext(), this);
     }
 
@@ -275,7 +276,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             }
             updateNotifyTimeRangeView();
 
-//            v.vibrate(50);
+            v.vibrate(50);
             Log.d("mine", "Diff is great enough!");
             sensorEventQueue.clear();
         }
@@ -295,7 +296,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                     HttpClient httpClient = new DefaultHttpClient();
                     try {
 
-                        HttpPost request = new HttpPost("http://chasetodo.meteor.com/multi_accels/");
+                        HttpPost request = new HttpPost("http://chaselambda.com:3000/multi_accels/");
                         Log.d("mine", "get JSON");
                         StringEntity params = new StringEntity(accelQueue.accelsToJSON());
                         Log.d("mine", "got JSON");
