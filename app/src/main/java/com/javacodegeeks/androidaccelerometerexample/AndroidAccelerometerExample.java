@@ -219,7 +219,9 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	@Override
 	public void onSensorChanged(SensorEvent event) {
         float[] current = {event.values[0], event.values[1], event.values[2]};
-        accelQueue.accelsToSend.add(new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
+        if (System.currentTimeMillis() - last_notify < MIN_SMS_DELAY) {
+            accelQueue.accelsToSend.add(new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
+        }
 
         count += 1;
 //        if (count % 10 == 0) {
@@ -325,18 +327,28 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                 //code to do the HTTP request
                 while (true) {
                     long curTime = System.currentTimeMillis();
-                    if (mMeteor.meteorConnected && curTime - last_notify < MIN_SMS_DELAY) {
-                        Log.d("mine", "connected, sending data");
-                        Map<String, Object> insertValues = new HashMap<String, Object>();
-                        insertValues.put("accelsJson", accelQueue.accelsToJSON());
-                        mMeteor.mMeteor.insert("batchAccels", insertValues);
+                    if (mMeteor.meteorConnected) {
+                        if (curTime - last_notify < MIN_SMS_DELAY){
+                            Log.d("mine", "connected, sending data");
+                            Map<String, Object> insertValues = new HashMap<String, Object>();
+                            insertValues.put("accelsJson", accelQueue.accelsToJSON());
+                            mMeteor.mMeteor.insert("batchAccels", insertValues);
+                            try {
+                                Thread.sleep(400);
+                            } catch (InterruptedException ex) {
+                                Thread.currentThread().interrupt();
+                            }
+
+                            Log.d("mine", "done sending data");
+                        }
+                    } else if (mMeteor.didDisconnect) {
+                        mMeteor = new MyMeteor();
+                        Log.d("mine", "Retrying websockets connection");
                         try {
-                            Thread.sleep(400);
-                        } catch(InterruptedException ex) {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ex) {
                             Thread.currentThread().interrupt();
                         }
-
-                        Log.d("mine", "done sending data");
                     }
                 }
             }

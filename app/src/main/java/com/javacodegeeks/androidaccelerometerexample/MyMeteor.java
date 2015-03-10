@@ -12,14 +12,15 @@ import im.delight.android.ddp.MeteorCallback;
  * Created by chase on 3/9/15.
  */
 public class MyMeteor implements MeteorCallback {
-    public boolean meteorConnected = false;
+    public boolean meteorConnected;
     public Meteor mMeteor;
-    public long lastVibrate;
+    public boolean didDisconnect;
 
     public MyMeteor() {
         mMeteor = new Meteor("ws://chasetodo.meteor.com/websocket");
         mMeteor.setCallback(this);
-        lastVibrate = 0;
+        meteorConnected = false;
+        didDisconnect = false;
     }
 
 
@@ -56,6 +57,7 @@ public class MyMeteor implements MeteorCallback {
     public void onDisconnect(int code, String reason) {
         System.out.println("Disconnected");
         meteorConnected = false;
+        didDisconnect = true;
     }
 
     @Override
