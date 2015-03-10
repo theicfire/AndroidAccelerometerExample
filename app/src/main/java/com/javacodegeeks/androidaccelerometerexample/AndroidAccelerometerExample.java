@@ -9,7 +9,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.speech.tts.TextToSpeech;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -24,8 +23,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Queue;
 
 
@@ -92,7 +92,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 //      startSendingServerData();
         mMeteor = new MyMeteor();
-        mMeteor.startSending();
+        meteorSender();
     }
 
 
@@ -315,5 +315,30 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     public void onDestroy() {
         super.onDestroy();
         mMeteor.disconnect();
+    }
+
+    public void meteorSender() {
+        Thread thread = new Thread(new Runnable(){
+            @Override
+            public void run(){
+                //code to do the HTTP request
+                while (true) {
+                    if (mMeteor.meteorConnected) {
+                        Log.d("mine", "connected, sending data");
+                        Map<String, Object> insertValues = new HashMap<String, Object>();
+                        insertValues.put("androidTime", System.currentTimeMillis());
+                        mMeteor.mMeteor.insert("hitters", insertValues);
+                        try {
+                            Thread.sleep(500);
+                        } catch(InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                        }
+
+                        Log.d("mine", "done sending data");
+                    }
+                }
+            }
+        });
+        thread.start();
     }
 }

@@ -12,60 +12,15 @@ import im.delight.android.ddp.MeteorCallback;
  * Created by chase on 3/9/15.
  */
 public class MyMeteor implements MeteorCallback {
-    private boolean meteorConnected = false;
-    private Meteor mMeteor;
+    public boolean meteorConnected = false;
+    public Meteor mMeteor;
 
     public MyMeteor() {
-
         mMeteor = new Meteor("ws://chasetodo.meteor.com/websocket");
         mMeteor.setCallback(this);
     }
 
-    public void startSending() {
-        Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                //code to do the HTTP request
-                while (true) {
-                    if (meteorConnected) {
-                        Log.d("mine", "connected, sending data");
-                        Map<String, Object> insertValues = new HashMap<String, Object>();
-//        insertValues.put("_id", "my-key");
-                        insertValues.put("androidTime", System.currentTimeMillis());
-                        mMeteor.insert("hitters", insertValues);
-                        try {
-                            Thread.sleep(500);
-                        } catch(InterruptedException ex) {
-                            Thread.currentThread().interrupt();
-                        }
 
-                        Log.d("mine", "done sending data");
-                    }
-//                    URL url;
-//                    HttpURLConnection conn;
-//                    BufferedReader rd;
-//                    String line;
-//                    String result = "";
-//                    try {
-//                        url = new URL("http://accel.chaselambda.com/");
-//                        conn = (HttpURLConnection) url.openConnection();
-//                        conn.setRequestMethod("GET");
-//                        rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                        while ((line = rd.readLine()) != null) {
-//                            result += line;
-//                        }
-//                        rd.close();
-//                        Log.d("mine", "RESULT" + result);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-                }
-            }
-        });
-        thread.start();
-    }
 
     @Override
     public void onConnect() {
