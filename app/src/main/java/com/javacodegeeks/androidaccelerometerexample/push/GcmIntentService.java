@@ -21,10 +21,14 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.javacodegeeks.androidaccelerometerexample.UKTextToSpeech;
+
+import java.util.Locale;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -37,9 +41,12 @@ public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder builder;
+    TextToSpeech ttobj;
 
     public GcmIntentService() {
+
         super("GcmIntentService");
+
     }
     public static final String TAG = "GCM Demo";
 
@@ -63,8 +70,19 @@ public class GcmIntentService extends IntentService {
                 Log.e(TAG, "Deleted messages on server: " + extras.toString());
             // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+                final String msg = extras.getString("text");
+                ttobj = new TextToSpeech(getApplicationContext(),
+                        new TextToSpeech.OnInitListener() {
+                            @Override
+                            public void onInit(int status) {
+                                if(status != TextToSpeech.ERROR){
+                                    ttobj.setLanguage(Locale.UK);
+                                    ttobj.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+                                }
+                            }
+                        });
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
-                Log.i(TAG, "Received: " + extras.toString());
+                Log.i(TAG, "Received: " + extras.getString("text"));
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.

@@ -27,8 +27,8 @@ public class UKTextToSpeech {
     }
     public void speakText(String toSpeak){
 
-        Toast.makeText(context, toSpeak,
-                Toast.LENGTH_SHORT).show();
+//        Toast.makeText(context, toSpeak,
+//                Toast.LENGTH_SHORT).show();
         ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
 
     }
