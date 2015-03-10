@@ -16,6 +16,8 @@ import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.javacodegeeks.androidaccelerometerexample.push.PushNotifications;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -93,6 +95,8 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 //      startSendingServerData();
         mMeteor = new MyMeteor();
         meteorSender();
+
+        PushNotifications pusher = new PushNotifications(getApplicationContext(), this);
     }
 
 
