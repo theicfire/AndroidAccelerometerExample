@@ -346,13 +346,13 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                             Log.d("mine", "done sending data");
                         }
                     } else if (mMeteor.didDisconnect) {
-                        mMeteor = new MyMeteor();
-                        Log.d("mine", "Retrying websockets connection");
+                        Log.d("mine", "reconnect!!");
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException ex) {
                             Thread.currentThread().interrupt();
                         }
+                        mMeteor.mMeteor.reconnect();
                     }
                 }
             }

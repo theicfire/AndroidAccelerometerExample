@@ -29,6 +29,12 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -215,6 +221,17 @@ public class PushNotifications {
      * to a server that echoes back the message using the 'from' address in the message.
      */
     private void sendRegistrationIdToBackend() {
-      // Your implementation here.
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpPost request = new HttpPost("http://chasetodo.meteor.com/regid/" + regid);
+        Log.d("mine", "sending regid of " + regid);
+        try {
+            httpClient.execute(request);
+        } catch (Exception ex) {
+            // handle exception here
+            Log.d("mine", "FAILED request");
+        } finally {
+            httpClient.getConnectionManager().shutdown();
+        }
+        Log.d("mine", "done sending regid");
     }
 }
