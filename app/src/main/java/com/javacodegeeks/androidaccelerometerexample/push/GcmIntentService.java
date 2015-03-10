@@ -43,7 +43,7 @@ import java.util.Locale;
  * service is finished, it calls {@code completeWakefulIntent()} to release the
  * wake lock.
  */
-public class GcmIntentService extends IntentService {
+public class GcmIntentService extends IntentService implements TextToSpeech.OnInitListener {
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder builder;
@@ -55,10 +55,12 @@ public class GcmIntentService extends IntentService {
 
     }
     public static final String TAG = "GCM Demo";
+    public String msg;
 
     @Override
     protected void onHandleIntent(Intent intent) {
         Bundle extras = intent.getExtras();
+        msg = extras.getString("text");
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         // The getMessageType() intent parameter must be the intent you received
         // in your BroadcastReceiver.
@@ -77,23 +79,22 @@ public class GcmIntentService extends IntentService {
             // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 final String msg = extras.getString("text");
-                ttobj = new TextToSpeech(getApplicationContext(),
-                        new TextToSpeech.OnInitListener() {
-                            @Override
-                            public void onInit(int status) {
-                                if(status != TextToSpeech.ERROR){
-                                    ttobj.setLanguage(Locale.UK);
-                                    ttobj.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
-                                    sendTTSReceived();
-                                }
-                            }
-                        });
+                ttobj = new TextToSpeech(getApplicationContext(), this);
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 Log.i(TAG, "Received: " + extras.getString("text"));
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
         GcmBroadcastReceiver.completeWakefulIntent(intent);
+    }
+
+    @Override
+    public void onInit(int status) {
+        if(status != TextToSpeech.ERROR){
+            ttobj.setLanguage(Locale.UK);
+            ttobj.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+            sendTTSReceived();
+        }
     }
 
     private void sendTTSReceived() {
