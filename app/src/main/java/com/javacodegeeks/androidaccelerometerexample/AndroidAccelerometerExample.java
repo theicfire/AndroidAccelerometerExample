@@ -326,10 +326,10 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                     if (mMeteor.meteorConnected) {
                         Log.d("mine", "connected, sending data");
                         Map<String, Object> insertValues = new HashMap<String, Object>();
-                        insertValues.put("androidTime", System.currentTimeMillis());
-                        mMeteor.mMeteor.insert("hitters", insertValues);
+                        insertValues.put("accelsJson", accelQueue.accelsToJSON());
+                        mMeteor.mMeteor.insert("batchAccels", insertValues);
                         try {
-                            Thread.sleep(500);
+                            Thread.sleep(400);
                         } catch(InterruptedException ex) {
                             Thread.currentThread().interrupt();
                         }
