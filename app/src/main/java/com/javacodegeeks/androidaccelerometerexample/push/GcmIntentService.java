@@ -26,6 +26,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.javacodegeeks.androidaccelerometerexample.AndroidAccelerometerExample;
 import com.javacodegeeks.androidaccelerometerexample.UKTextToSpeech;
 
 import org.apache.http.HttpResponse;
@@ -82,6 +83,12 @@ public class GcmIntentService extends IntentService implements TextToSpeech.OnIn
                 ttobj = new TextToSpeech(getApplicationContext(), this);
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 Log.i(TAG, "Received: " + extras.getString("text"));
+
+                Intent sendIntent = new Intent(getApplicationContext(),AndroidAccelerometerExample.class);
+                sendIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, extras.getString("text"));
+                startActivity(sendIntent);
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
@@ -104,6 +111,7 @@ public class GcmIntentService extends IntentService implements TextToSpeech.OnIn
                 //code to do the HTTP request
                     HttpClient httpClient = new DefaultHttpClient();
                     try {
+                        Log.d("mine", "Sending tts received");
                         HttpPost request = new HttpPost("http://chaselambda.com:3000/tts-received");
                         request.addHeader("content-type", "application/json");
                         httpClient.execute(request);

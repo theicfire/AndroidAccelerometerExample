@@ -2,6 +2,7 @@ package com.javacodegeeks.androidaccelerometerexample;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -102,6 +103,20 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 
         locationMonitor = new LocationMonitor(this);
+    }
+
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+//        setIntent(intent);//must store the new intent unless getIntent() will return the old one
+        String intentText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        Log.d("mine", "Got intent text: " + intentText);
+        if (intentText.equals("gps-off")) {
+            Log.d("mine", "GPS OFF");
+            locationMonitor.mGoogleApiClient.disconnect();
+        } else if (intentText.equals("gps-on")) {
+            locationMonitor.mGoogleApiClient.connect();
+            Log.d("mine", "GPS ON");
+        }
     }
 
 
