@@ -61,6 +61,8 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     private AccelQueue accelQueue;
 
+    private LocationMonitor locationMonitor;
+
     @Override
 	public void onCreate(Bundle savedInstanceState) {
         sensorEventQueue = new LinkedList<float[]>();
@@ -92,12 +94,14 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         ttobj = new UKTextToSpeech(getApplicationContext());
 
-//      startSendingServerData();
         mMeteor = new MyMeteor();
         meteorSender();
 
         Log.d("mine", "Push creating, at the start");
         PushNotifications pusher = new PushNotifications(getApplicationContext(), this);
+
+
+        locationMonitor = new LocationMonitor(this);
     }
 
 
@@ -276,7 +280,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             }
             updateNotifyTimeRangeView();
 
-            v.vibrate(50);
+//            v.vibrate(50);
             Log.d("mine", "Diff is great enough!");
             sensorEventQueue.clear();
         }
@@ -318,6 +322,20 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         });
         thread.start();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("mine", "onstart called");
+        locationMonitor.mGoogleApiClient.connect();
+        Log.d("mine", "THEN CALLED connect()");
+    }
+
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+////        locationMonitor.mGoogleApiClient.disconnect(); // DON't stop, we want to run this in the background
+//    }
 
     @Override
     public void onDestroy() {
