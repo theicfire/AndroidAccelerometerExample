@@ -338,13 +338,13 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         thread.start();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d("mine", "onstart called");
-        locationMonitor.mGoogleApiClient.connect();
-        Log.d("mine", "THEN CALLED connect()");
-    }
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        Log.d("mine", "onstart called");
+//        locationMonitor.mGoogleApiClient.connect();
+//        Log.d("mine", "THEN CALLED connect()");
+//    }
 
 //    @Override
 //    protected void onStop() {
