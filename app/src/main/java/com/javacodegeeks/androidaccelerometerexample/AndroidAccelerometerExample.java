@@ -10,10 +10,13 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.EditText;
+import android.widget.Toast;
+import android.telephony.SmsManager;
 
 import com.javacodegeeks.androidaccelerometerexample.push.PushNotifications;
 
@@ -23,11 +26,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
 
 
-public class AndroidAccelerometerExample extends Activity implements SensorEventListener {
+public class AndroidAccelerometerExample extends Activity implements SensorEventListener, TextToSpeech.OnInitListener {
 
 	private SensorManager sensorManager;
 	private Sensor accelerometer;
@@ -52,12 +57,15 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	private TextView countView, timeTillSMSAllowedView, notifyTimeRangeView;
 
 	public Vibrator v;
-    UKTextToSpeech ttobj;
+    TextToSpeech ttobj;
+
     private MyMeteor mMeteor;
 
     public AccelQueue accelQueue;
 
     private LocationMonitor locationMonitor;
+
+    private boolean isProduction = false;
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -89,7 +97,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         accelQueue = new AccelQueue();
 
-        ttobj = new UKTextToSpeech(getApplicationContext());
+        ttobj = new TextToSpeech(getApplicationContext(), this);
 
         mMeteor = new MyMeteor(this);
 
@@ -98,6 +106,38 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 
         locationMonitor = new LocationMonitor(this);
+
+        ttobj = new TextToSpeech(getApplicationContext(), this);
+
+    }
+
+    @Override
+    public void onInit(int status) {
+        if(status != TextToSpeech.ERROR){
+            ttobj.setLanguage(Locale.UK);
+        }
+    }
+
+    private void sendTTSReceived() {
+        Thread thread = new Thread(new Runnable(){
+            @Override
+            public void run(){
+                //code to do the HTTP request
+                HttpClient httpClient = new DefaultHttpClient();
+                try {
+                    Log.d("mine", "Sending tts received");
+                    HttpPost request = new HttpPost("http://chaselambda.com:3000/tts-received");
+                    request.addHeader("content-type", "application/json");
+                    httpClient.execute(request);
+                } catch (Exception ex) {
+                    // handle exception here
+                    Log.d("mine", "FAILED request");
+                } finally {
+                    httpClient.getConnectionManager().shutdown();
+                }
+            }
+        });
+        thread.start();
     }
 
     protected void onNewIntent(Intent intent) {
@@ -111,7 +151,15 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         } else if (intentText.equals("gps-on")) {
             locationMonitor.mGoogleApiClient.connect();
             Log.d("mine", "GPS ON");
+        } else if (intentText.equals("prod")) {
+            isProduction = true;
+            Log.d("mine", "PRODUCTION ON");
+        } else if (intentText.equals("debug")) {
+            isProduction = false;
+            Log.d("mine", "PRODUCTION OFF");
         }
+        ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
+        sendTTSReceived();
     }
 
 
@@ -282,12 +330,13 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             if (shouldNotify(curTime)) {
                 Log.d("mine", "Actual notify. Sending sms!");
                 last_notify = curTime;
-                // TODO maybe notify?
-//                ttobj.speakText("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.");
-//                Date date = new Date();
-//
-//                SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
-//                Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
+                if (isProduction) {
+                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
+                    Date date = new Date();
+                    SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
+                    Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
+                }
+
             }
             updateNotifyTimeRangeView();
 
