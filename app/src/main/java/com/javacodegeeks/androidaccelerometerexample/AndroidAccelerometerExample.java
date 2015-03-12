@@ -39,7 +39,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     private static int MAX_NOTIFY_DELTA = 20 * 1000;
     private static int MIN_NOTIFY_DELTA = 5 * 1000;
-    public static int MIN_SMS_DELAY = 40 * 1000;
     public long last_notify = 0;
     private Queue<float[]> sensorEventQueue;
     public Queue<Long> movementTimesQueue; // TODO make private
@@ -54,7 +53,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     private int count;
 
-	private TextView countView, timeTillSMSAllowedView, notifyTimeRangeView;
+	private TextView countView, notifyTimeRangeView;
 
 	public Vibrator v;
     TextToSpeech ttobj;
@@ -66,6 +65,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     private LocationMonitor locationMonitor;
 
     private boolean isProduction = false;
+    private boolean alarmTriggered = false;
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -157,6 +157,9 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         } else if (intentText.equals("debug")) {
             isProduction = false;
             Log.d("mine", "PRODUCTION OFF");
+        } else if (intentText.equals("alarm-reset")) {
+            alarmTriggered = false;
+            updateNotifyTimeRangeView();
         }
         ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         sendTTSReceived();
@@ -183,15 +186,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                 }
             }
         });
-        minSMSDelay = (EditText) findViewById(R.id.minSMSDelay);
-        minSMSDelay.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (!hasFocus) {
-                    updateSettings();
-                }
-            }
-        });
         updateSettings();
     }
 
@@ -201,20 +195,12 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         MAX_NOTIFY_DELTA = Integer.valueOf(maxNotifyView.getText().toString()) * 1000;
         Log.d("mine", "max" + MAX_NOTIFY_DELTA);
 
-        MIN_SMS_DELAY = Integer.valueOf(minSMSDelay.getText().toString()) * 1000;
-        Log.d("mine", "sms is " + MIN_SMS_DELAY);
-
-    }
-
-    private String timeTillSMSAllowed() {
-        if (System.currentTimeMillis() - last_notify > MIN_SMS_DELAY) {
-            return "0";
-        }
-        return Long.toString((MIN_SMS_DELAY - (System.currentTimeMillis() - last_notify)) / 1000);
     }
 
     private void updateNotifyTimeRangeView() {
-        if (shouldNotifyIfAdded(System.currentTimeMillis())) {
+        if (alarmTriggered) {
+            notifyTimeRangeView.setText("Alarm triggered!");
+        } else if (shouldNotifyIfAdded(System.currentTimeMillis())) {
             notifyTimeRangeView.setText("Notification on next bump!");
         } else {
             notifyTimeRangeView.setText("Notification are sleeping");
@@ -230,13 +216,9 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                     try {
                         Thread.sleep(1000);
                         mHandler.post(new Runnable() {
-
                             @Override
                             public void run() {
-                                timeTillSMSAllowedView.setText(timeTillSMSAllowed());
                                 updateNotifyTimeRangeView();
-
-
                             }
                         });
                     } catch (Exception e) {
@@ -260,7 +242,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 	public void initializeViews() {
         countView = (TextView) findViewById(R.id.count);
-        timeTillSMSAllowedView = (TextView) findViewById(R.id.timeTillSMSAllowed);
         notifyTimeRangeView = (TextView) findViewById(R.id.notifyTimeRange);
 
 
@@ -286,7 +267,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	@Override
 	public void onSensorChanged(SensorEvent event) {
         float[] current = {event.values[0], event.values[1], event.values[2]};
-        if (System.currentTimeMillis() - last_notify < MIN_SMS_DELAY) {
+        if (alarmTriggered) {
             accelQueue.accelsToSend.add(new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
         }
 
@@ -315,9 +296,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         }
 
         if (movementTimesQueue.peek() != null && movementTimesQueue.peek() < millis - MIN_NOTIFY_DELTA) {
-            if (millis - last_notify > MIN_SMS_DELAY) {
-                return true;
-            }
+            return true;
         }
         return false;
     }
@@ -327,7 +306,8 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	public void maybeVibrate(float[] current) {
         if (maxAccelDifference(current) > vibrateThreshold) {
             long curTime = System.currentTimeMillis();
-            if (shouldNotify(curTime)) {
+            if (shouldNotify(curTime) && !alarmTriggered) {
+                alarmTriggered = true;
                 Log.d("mine", "Actual notify. Sending sms!");
                 last_notify = curTime;
                 if (isProduction) {
