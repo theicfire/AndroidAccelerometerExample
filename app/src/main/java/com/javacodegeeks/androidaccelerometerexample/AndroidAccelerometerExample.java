@@ -10,12 +10,10 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.javacodegeeks.androidaccelerometerexample.push.PushNotifications;
 
@@ -25,10 +23,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 
 
@@ -39,7 +34,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     private static int MAX_NOTIFY_DELTA = 20 * 1000;
     private static int MIN_NOTIFY_DELTA = 5 * 1000;
-    private static int MIN_SMS_DELAY = 40 * 1000;
+    public static int MIN_SMS_DELAY = 40 * 1000;
     public long last_notify = 0;
     private Queue<float[]> sensorEventQueue;
     public Queue<Long> movementTimesQueue; // TODO make private
@@ -60,7 +55,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     UKTextToSpeech ttobj;
     private MyMeteor mMeteor;
 
-    private AccelQueue accelQueue;
+    public AccelQueue accelQueue;
 
     private LocationMonitor locationMonitor;
 
@@ -68,6 +63,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	public void onCreate(Bundle savedInstanceState) {
         sensorEventQueue = new LinkedList<float[]>();
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.activity_main);
 		initializeViews();
 
@@ -95,8 +91,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         ttobj = new UKTextToSpeech(getApplicationContext());
 
-        mMeteor = new MyMeteor();
-        meteorSender();
+        mMeteor = new MyMeteor(this);
 
         Log.d("mine", "Push creating, at the start");
         PushNotifications pusher = new PushNotifications(getApplicationContext(), this);
@@ -287,6 +282,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             if (shouldNotify(curTime)) {
                 Log.d("mine", "Actual notify. Sending sms!");
                 last_notify = curTime;
+                mMeteor.runSender();
 //                ttobj.speakText("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.");
 //                Date date = new Date();
 //
@@ -349,48 +345,14 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 //    @Override
 //    protected void onStop() {
 //        super.onStop();
-////        locationMonitor.mGoogleApiClient.disconnect(); // DON't stop, we want to run this in the background
+////        locationMonitor.mGoogleApiClient.purposefulDisconnect(); // DON't stop, we want to run this in the background
 //    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mMeteor.disconnect();
+        mMeteor.purposefulDisconnect();
     }
 
-    public void meteorSender() {
-        Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                //code to do the HTTP request
-                while (true) {
-                    long curTime = System.currentTimeMillis();
-                    if (mMeteor.meteorConnected) {
-                        if (curTime - last_notify < MIN_SMS_DELAY){
-                            Log.d("mine", "connected, sending data");
-                            Map<String, Object> insertValues = new HashMap<String, Object>();
-                            insertValues.put("accelsJson", accelQueue.accelsToJSON());
-                            mMeteor.mMeteor.insert("batchAccels", insertValues);
-                            try {
-                                Thread.sleep(400);
-                            } catch (InterruptedException ex) {
-                                Thread.currentThread().interrupt();
-                            }
 
-                            Log.d("mine", "done sending data");
-                        }
-                    } else if (mMeteor.didDisconnect) {
-                        Log.d("mine", "reconnect!!");
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ex) {
-                            Thread.currentThread().interrupt();
-                        }
-                        mMeteor.mMeteor.reconnect();
-                    }
-                }
-            }
-        });
-        thread.start();
-    }
 }
