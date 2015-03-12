@@ -19,6 +19,7 @@ public class MyMeteor implements MeteorCallback {
     private boolean started = false;
     AndroidAccelerometerExample activity;
     private boolean reconnecting = false;
+    private boolean meteorSenderStarted = false;
 //    private Lock lock = new ReentrantLock();
 
     public MyMeteor(AndroidAccelerometerExample activity) {
@@ -32,7 +33,10 @@ public class MyMeteor implements MeteorCallback {
         System.out.println("Connected");
         Log.d(TAG, "onConnect");
         reconnecting = false;
-        meteorSender();
+        if (!meteorSenderStarted) {
+            meteorSender();
+            meteorSenderStarted = true;
+        }
     }
 
     @Override
@@ -96,15 +100,18 @@ public class MyMeteor implements MeteorCallback {
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
-
-                    Log.d(TAG, "connected, sending data");
-                    Map<String, Object> insertValues = new HashMap<String, Object>();
-                    // Potentially blocking! Nonzero JSON entries guaranteed.
-                    insertValues.put("accelsJson", activity.accelQueue.accelsToJSON());
-                    Log.d(TAG, "Meteor insert!");
-                    mMeteor.insert("batchAccels", insertValues);
-                    Log.d(TAG, "Meteor insert done!");
-
+                    if (mMeteor.isConnected()) {
+                        Log.d(TAG, "connected, sending data");
+                        Map<String, Object> insertValues = new HashMap<String, Object>();
+                        // Potentially blocking! Nonzero JSON entries guaranteed.
+                        insertValues.put("accelsJson", activity.accelQueue.accelsToJSON());
+                        Log.d(TAG, "Meteor insert!");
+                        mMeteor.insert("batchAccels", insertValues);
+                        Log.d(TAG, "Meteor insert done!");
+                    } else {
+                        Log.w(TAG, "Clearing accelsToSend, because meteor is not connected");
+                        activity.accelQueue.accelsToSend.clear();
+                    }
                 }
             }
         });

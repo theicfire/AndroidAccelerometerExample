@@ -37,16 +37,8 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	private SensorManager sensorManager;
 	private Sensor accelerometer;
 
-    private static int MAX_NOTIFY_DELTA = 20 * 1000;
-    private static int MIN_NOTIFY_DELTA = 5 * 1000;
     public long last_notify = 0;
     private Queue<float[]> sensorEventQueue;
-    public Queue<Long> movementTimesQueue; // TODO make private
-
-    EditText minNotifyView;
-    EditText maxNotifyView;
-    EditText minSMSDelay;
-
 
     private float vibrateThreshold = 0;
     private Handler mHandler;
@@ -90,10 +82,8 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 		v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
         count = 0;
-        movementTimesQueue = new LinkedList<Long>();
 
         setupTimeUpdate();
-        setupSettings();
 
         accelQueue = new AccelQueue();
 
@@ -162,48 +152,15 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             sensorEventQueue.clear();
             updateNotifyTimeRangeView();
             locationMonitor.gpsOff();
+        } else {
+            ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
-        ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         sendTTSReceived();
-    }
-
-
-    private void setupSettings() {
-        minNotifyView = (EditText) findViewById(R.id.minNotifyView);
-        minNotifyView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (!hasFocus) {
-                    updateSettings();
-                }
-            }
-        });
-
-        maxNotifyView = (EditText) findViewById(R.id.maxNotifyView);
-        maxNotifyView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (!hasFocus) {
-                    updateSettings();
-                }
-            }
-        });
-        updateSettings();
-    }
-
-    private void updateSettings() {
-        MIN_NOTIFY_DELTA = Integer.valueOf(minNotifyView.getText().toString()) * 1000;
-        Log.d("mine", "min notify is" + MIN_NOTIFY_DELTA);
-        MAX_NOTIFY_DELTA = Integer.valueOf(maxNotifyView.getText().toString()) * 1000;
-        Log.d("mine", "max" + MAX_NOTIFY_DELTA);
-
     }
 
     private void updateNotifyTimeRangeView() {
         if (alarmTriggered) {
             notifyTimeRangeView.setText("Alarm triggered!");
-        } else if (shouldNotifyIfAdded(System.currentTimeMillis())) {
-            notifyTimeRangeView.setText("Notification on next bump!");
         } else {
             notifyTimeRangeView.setText("Notification are sleeping");
         }
@@ -283,33 +240,13 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 		maybeVibrate(current); // TODO bring back
 	}
 
-    public boolean shouldNotify(long millis) {
-        movementTimesQueue.add(millis);
-        if (shouldNotifyIfAdded(millis)) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean shouldNotifyIfAdded(long millis) {
-        // clear queue
-        while (movementTimesQueue.peek() != null && movementTimesQueue.peek() < millis - MAX_NOTIFY_DELTA) {
-            movementTimesQueue.remove();
-        }
-
-        if (movementTimesQueue.peek() != null && movementTimesQueue.peek() < millis - MIN_NOTIFY_DELTA) {
-            return true;
-        }
-        return false;
-    }
-
 
         // if the change in the accelerometer value is big enough, then vibrate!
 	// our threshold is MaxValue/2
 	public void maybeVibrate(float[] current) {
         if (maxAccelDifference(current) > vibrateThreshold) {
             long curTime = System.currentTimeMillis();
-            if (shouldNotify(curTime) && !alarmTriggered) {
+            if (!alarmTriggered) {
                 alarmTriggered = true;
                 Log.d("mine", "Actual notify. Sending sms!");
                 last_notify = curTime;
@@ -318,53 +255,55 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                     Date date = new Date();
                     SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
                     Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
+                } else {
+                    v.vibrate(50);
                 }
                 locationMonitor.gpsOn();
             }
             updateNotifyTimeRangeView();
 
-//            v.vibrate(50);
+
             Log.d("mine", "Diff is great enough!");
             sensorEventQueue.clear();
         }
         sensorEventQueue.add(current);
-        if (sensorEventQueue.size() > 100) {
+        if (sensorEventQueue.size() > 10000) {
             sensorEventQueue.remove();
         }
 
 	}
-
-    private void startSendingServerData() {
-        Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                //code to do the HTTP request
-                while (true) {
-                    HttpClient httpClient = new DefaultHttpClient();
-                    try {
-
-                        HttpPost request = new HttpPost("http://chaselambda.com:3000/multi_accels/");
-                        Log.d("mine", "get JSON");
-                        StringEntity params = new StringEntity(accelQueue.accelsToJSON());
-                        Log.d("mine", "got JSON");
-                        request.addHeader("content-type", "application/json");
-                        request.setEntity(params);
-                        Log.d("mine", "Attempt to send for count" + count);
-                        HttpResponse response = httpClient.execute(request);
-//                response.getStatusLine().getStatusCode();
-                        Log.d("mine", "SUCCESS request for count " + count);
-
-                    } catch (Exception ex) {
-                        // handle exception here
-                        Log.d("mine", "FAILED request");
-                    } finally {
-                        httpClient.getConnectionManager().shutdown();
-                    }
-                }
-            }
-        });
-        thread.start();
-    }
+//
+//    private void startSendingServerData() {
+//        Thread thread = new Thread(new Runnable(){
+//            @Override
+//            public void run(){
+//                //code to do the HTTP request
+//                while (true) {
+//                    HttpClient httpClient = new DefaultHttpClient();
+//                    try {
+//
+//                        HttpPost request = new HttpPost("http://chaselambda.com:3000/multi_accels/");
+//                        Log.d("mine", "get JSON");
+//                        StringEntity params = new StringEntity(accelQueue.accelsToJSON());
+//                        Log.d("mine", "got JSON");
+//                        request.addHeader("content-type", "application/json");
+//                        request.setEntity(params);
+//                        Log.d("mine", "Attempt to send for count" + count);
+//                        HttpResponse response = httpClient.execute(request);
+////                response.getStatusLine().getStatusCode();
+//                        Log.d("mine", "SUCCESS request for count " + count);
+//
+//                    } catch (Exception ex) {
+//                        // handle exception here
+//                        Log.d("mine", "FAILED request");
+//                    } finally {
+//                        httpClient.getConnectionManager().shutdown();
+//                    }
+//                }
+//            }
+//        });
+//        thread.start();
+//    }
 
 //    @Override
 //    protected void onStart() {

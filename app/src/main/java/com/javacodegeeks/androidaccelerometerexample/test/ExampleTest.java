@@ -43,26 +43,26 @@ public class ExampleTest
         assertEquals(0, activity.last_notify);
     }
 
-    public void testShouldNotify_wait2Minutes() {
-        activity.movementTimesQueue = new LinkedList<Long>();
-        assertEquals(false, activity.shouldNotify(1000000 + 0));
-        assertEquals(0, activity.last_notify);
-
-        assertEquals(true, activity.shouldNotify(1000000 + 10 * SECONDS_TO_MILLIS));
-        // Nothing until after 2 minutes
-        assertEquals(false, activity.shouldNotify(1000000 + 11 * SECONDS_TO_MILLIS));
-        assertEquals(false, activity.shouldNotify(1000000 + 300 * SECONDS_TO_MILLIS));
-        assertEquals(false, activity.shouldNotify(1000000 + 301 * SECONDS_TO_MILLIS));
-        assertEquals(1000000 + 10 * SECONDS_TO_MILLIS, activity.last_notify);
-        assertEquals(true, activity.shouldNotify(1000000 + 306 * SECONDS_TO_MILLIS));
-        assertEquals(1000000 + 306 * SECONDS_TO_MILLIS, activity.last_notify);
-    }
-
-    public void testShouldNotify_tooLongBetweenEvents() {
-        activity.movementTimesQueue = new LinkedList<Long>();
-        assertEquals(false, activity.shouldNotify(1000000 + 0));
-        assertEquals(0, activity.last_notify);
-
-        assertEquals(false, activity.shouldNotify(1000000 + 100 * SECONDS_TO_MILLIS));
-    }
+//    public void testShouldNotify_wait2Minutes() {
+//        activity.movementTimesQueue = new LinkedList<Long>();
+//        assertEquals(false, activity.shouldNotify(1000000 + 0));
+//        assertEquals(0, activity.last_notify);
+//
+//        assertEquals(true, activity.shouldNotify(1000000 + 10 * SECONDS_TO_MILLIS));
+//        // Nothing until after 2 minutes
+//        assertEquals(false, activity.shouldNotify(1000000 + 11 * SECONDS_TO_MILLIS));
+//        assertEquals(false, activity.shouldNotify(1000000 + 300 * SECONDS_TO_MILLIS));
+//        assertEquals(false, activity.shouldNotify(1000000 + 301 * SECONDS_TO_MILLIS));
+//        assertEquals(1000000 + 10 * SECONDS_TO_MILLIS, activity.last_notify);
+//        assertEquals(true, activity.shouldNotify(1000000 + 306 * SECONDS_TO_MILLIS));
+//        assertEquals(1000000 + 306 * SECONDS_TO_MILLIS, activity.last_notify);
+//    }
+//
+//    public void testShouldNotify_tooLongBetweenEvents() {
+//        activity.movementTimesQueue = new LinkedList<Long>();
+//        assertEquals(false, activity.shouldNotify(1000000 + 0));
+//        assertEquals(0, activity.last_notify);
+//
+//        assertEquals(false, activity.shouldNotify(1000000 + 100 * SECONDS_TO_MILLIS));
+//    }
 }
