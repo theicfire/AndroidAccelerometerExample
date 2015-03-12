@@ -89,7 +89,13 @@ public class LocationMonitor implements
                 httpClient.getConnectionManager().shutdown();
             }
         }
+    }
 
+    public void gpsOn() {
+        mGoogleApiClient.connect();
+    }
+    public void gpsOff() {
+        mGoogleApiClient.disconnect();
     }
 
 }

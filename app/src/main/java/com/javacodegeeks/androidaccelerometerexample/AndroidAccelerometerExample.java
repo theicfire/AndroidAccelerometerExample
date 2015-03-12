@@ -146,10 +146,10 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         String intentText = intent.getStringExtra(Intent.EXTRA_TEXT);
         Log.d("mine", "Got intent text: " + intentText);
         if (intentText.equals("gps-off")) {
+            locationMonitor.gpsOff();
             Log.d("mine", "GPS OFF");
-            locationMonitor.mGoogleApiClient.disconnect();
         } else if (intentText.equals("gps-on")) {
-            locationMonitor.mGoogleApiClient.connect();
+            locationMonitor.gpsOn();
             Log.d("mine", "GPS ON");
         } else if (intentText.equals("prod")) {
             isProduction = true;
@@ -159,7 +159,9 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             Log.d("mine", "PRODUCTION OFF");
         } else if (intentText.equals("alarm-reset")) {
             alarmTriggered = false;
+            sensorEventQueue.clear();
             updateNotifyTimeRangeView();
+            locationMonitor.gpsOff();
         }
         ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         sendTTSReceived();
@@ -301,6 +303,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         return false;
     }
 
+
         // if the change in the accelerometer value is big enough, then vibrate!
 	// our threshold is MaxValue/2
 	public void maybeVibrate(float[] current) {
@@ -316,7 +319,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                     SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
                     Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
                 }
-
+                locationMonitor.gpsOn();
             }
             updateNotifyTimeRangeView();
 
