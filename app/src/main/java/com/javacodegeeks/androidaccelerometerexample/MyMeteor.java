@@ -18,9 +18,8 @@ public class MyMeteor implements MeteorCallback {
     public Meteor mMeteor;
     private boolean started = false;
     AndroidAccelerometerExample activity;
-
-    private Lock lock = new ReentrantLock();
-    private boolean meteorSenderRunning = false;
+    private boolean reconnecting = false;
+//    private Lock lock = new ReentrantLock();
 
     public MyMeteor(AndroidAccelerometerExample activity) {
         this.activity = activity;
@@ -32,25 +31,32 @@ public class MyMeteor implements MeteorCallback {
     public void onConnect() {
         System.out.println("Connected");
         Log.d(TAG, "onConnect");
-        // Let's catch up to Meteor before disconnecting
-        Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-                purposefulDisconnect();
-            }
-        });
-        thread.start();
-
+        reconnecting = false;
+        meteorSender();
     }
 
     @Override
     public void onDisconnect(int code, String reason) {
         System.out.println("Disconnected");
+
+        if (!reconnecting) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(4000);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                    System.out.println("Try to reconnect");
+                    reconnecting = false;
+                    mMeteor.reconnect();
+                }
+            });
+            thread.start();
+        }
+        reconnecting = true;
+
     }
 
     @Override
@@ -79,73 +85,27 @@ public class MyMeteor implements MeteorCallback {
         }
     }
 
-    public void purposefulDisconnect() {
-        Log.d(TAG, "Purposeful disconnect");
-        // does not call onDisconnect()
-        mMeteor.disconnect();
-    }
-
-    public void reconnect() {
-        Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                while (!mMeteor.isConnected()) {
-                    Log.d(TAG, "reconnect!!");
-                    mMeteor.reconnect();
-                    try {
-                        Thread.sleep(4000);
-                    } catch (InterruptedException ex) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-                meteorSender();
-            }
-        });
-        thread.start();
-    }
-
-    public void runSender() {
-        Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run() {
-                lock.lock();
-                Log.d(TAG, "runSender for " + meteorSenderRunning);
-                if (!meteorSenderRunning) {
-                    Log.d(TAG, "reconnecting");
-                    reconnect();
-                }
-                lock.unlock();
-            }
-        });
-        thread.start();
-    }
-
     public void meteorSender() {
         Thread thread = new Thread(new Runnable(){
             @Override
             public void run(){
                 Log.d(TAG, "Running meteorSender");
-                lock.lock();
-                meteorSenderRunning = true;
-                while (mMeteor.isConnected() && System.currentTimeMillis() - activity.last_notify < activity.MIN_SMS_DELAY) {
-                    lock.unlock();
-                    Log.d(TAG, "connected, sending data");
-                    Map<String, Object> insertValues = new HashMap<String, Object>();
-                    insertValues.put("accelsJson", activity.accelQueue.accelsToJSON());
-                    mMeteor.insert("batchAccels", insertValues);
+                while (true) {
                     try {
                         Thread.sleep(400);
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
 
-                    Log.d(TAG, "done sending data");
-                    lock.lock();
+                    Log.d(TAG, "connected, sending data");
+                    Map<String, Object> insertValues = new HashMap<String, Object>();
+                    // Potentially blocking! Nonzero JSON entries guaranteed.
+                    insertValues.put("accelsJson", activity.accelQueue.accelsToJSON());
+                    Log.d(TAG, "Meteor insert!");
+                    mMeteor.insert("batchAccels", insertValues);
+                    Log.d(TAG, "Meteor insert done!");
+
                 }
-                meteorSenderRunning = false;
-                purposefulDisconnect();
-                lock.unlock();
-                Log.d(TAG, "meteorSender stopping");
             }
         });
         thread.start();

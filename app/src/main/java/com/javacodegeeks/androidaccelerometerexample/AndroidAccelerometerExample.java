@@ -282,7 +282,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             if (shouldNotify(curTime)) {
                 Log.d("mine", "Actual notify. Sending sms!");
                 last_notify = curTime;
-                mMeteor.runSender();
+                // TODO maybe notify?
 //                ttobj.speakText("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.");
 //                Date date = new Date();
 //
@@ -351,7 +351,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mMeteor.purposefulDisconnect();
+        mMeteor.mMeteor.disconnect();
     }
 
 
