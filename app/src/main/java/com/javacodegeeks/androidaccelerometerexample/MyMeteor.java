@@ -2,6 +2,7 @@ package com.javacodegeeks.androidaccelerometerexample;
 
 import android.util.Log;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -87,6 +88,15 @@ public class MyMeteor implements MeteorCallback {
         if (e != null) {
             e.printStackTrace();
         }
+    }
+
+    public void alarmTrigger() {
+        Map<String, Object> insertValues = new HashMap<String, Object>();
+        // Potentially blocking! Nonzero JSON entries guaranteed.
+        insertValues.put("androidTime", System.currentTimeMillis());
+        Log.d(TAG, "Meteor alert!");
+        mMeteor.insert("alarms", insertValues);
+        Log.d(TAG, "Meteor alert done");
     }
 
     public void meteorSender() {

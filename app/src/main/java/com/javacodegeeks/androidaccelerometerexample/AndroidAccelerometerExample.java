@@ -157,6 +157,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             locationMonitor.gpsOff();
         } else if (intentText.equals("alarm-trigger")) {
             alarmTriggered = true;
+            mMeteor.alarmTrigger();
             ttobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
             locationMonitor.gpsOn();
         } else {
@@ -254,9 +255,10 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             long curTime = System.currentTimeMillis();
             if (!alarmTriggered) {
                 alarmTriggered = true;
+                mMeteor.alarmTrigger();
                 Log.d("mine", "Actual notify. Sending sms!");
                 if (isProduction) {
-                    ttobj.speak("ebay", TextToSpeech.QUEUE_FLUSH, null);
+                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
 //                    Date date = new Date();
 //                    SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
                     Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
