@@ -27,9 +27,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 public class AndroidAccelerometerExample extends Activity implements SensorEventListener, TextToSpeech.OnInitListener {
@@ -37,7 +40,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	private SensorManager sensorManager;
 	private Sensor accelerometer;
 
-    public long last_notify = 0;
     private Queue<float[]> sensorEventQueue;
 
     private float vibrateThreshold = 0;
@@ -54,6 +56,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     public AccelQueue accelQueue;
 
+
     private LocationMonitor locationMonitor;
 
     private boolean isProduction = false;
@@ -61,7 +64,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
-        sensorEventQueue = new LinkedList<float[]>();
+        sensorEventQueue = new ConcurrentLinkedQueue<float[]>();
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_main);
@@ -73,7 +76,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
 			accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 			sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-			vibrateThreshold = accelerometer.getMaximumRange() / 50;
+			vibrateThreshold = (float) .5;
 		} else {
 			// fail! we dont have an accelerometer!
 		}
@@ -150,8 +153,12 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         } else if (intentText.equals("alarm-reset")) {
             alarmTriggered = false;
             sensorEventQueue.clear();
-            updateNotifyTimeRangeView();
+        updateNotifyTimeRangeView();
             locationMonitor.gpsOff();
+        } else if (intentText.equals("alarm-trigger")) {
+            alarmTriggered = true;
+            ttobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
+            locationMonitor.gpsOn();
         } else {
             ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
@@ -226,9 +233,9 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	@Override
 	public void onSensorChanged(SensorEvent event) {
         float[] current = {event.values[0], event.values[1], event.values[2]};
-        if (alarmTriggered) {
-            accelQueue.accelsToSend.add(new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
-        }
+        AccelTime accelTime = new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis());
+        accelQueue.accelsToSend.add(accelTime);
+
 
         count += 1;
 //        if (count % 10 == 0) {
@@ -240,7 +247,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 		maybeVibrate(current); // TODO bring back
 	}
 
-
         // if the change in the accelerometer value is big enough, then vibrate!
 	// our threshold is MaxValue/2
 	public void maybeVibrate(float[] current) {
@@ -249,11 +255,10 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             if (!alarmTriggered) {
                 alarmTriggered = true;
                 Log.d("mine", "Actual notify. Sending sms!");
-                last_notify = curTime;
                 if (isProduction) {
-                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
-                    Date date = new Date();
-                    SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
+                    ttobj.speak("ebay", TextToSpeech.QUEUE_FLUSH, null);
+//                    Date date = new Date();
+//                    SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
                     Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
                 } else {
                     v.vibrate(50);
@@ -267,8 +272,8 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             sensorEventQueue.clear();
         }
         sensorEventQueue.add(current);
-        if (sensorEventQueue.size() > 10000) {
-            sensorEventQueue.remove();
+        if (sensorEventQueue.size() > 100) {
+            sensorEventQueue.poll();
         }
 
 	}

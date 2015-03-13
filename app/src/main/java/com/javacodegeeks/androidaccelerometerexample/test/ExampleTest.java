@@ -40,7 +40,6 @@ public class ExampleTest
 
     public void testPreconditions() {
         assertNotNull("activity is null", activity);
-        assertEquals(0, activity.last_notify);
     }
 
 //    public void testShouldNotify_wait2Minutes() {

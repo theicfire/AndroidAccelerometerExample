@@ -13,8 +13,7 @@ public class AccelQueue {
     public LinkedBlockingQueue<AccelTime> accelsToSend;
 
     public AccelQueue() {
-        accelsToSend = new LinkedBlockingQueue<AccelTime>() {
-        };
+        accelsToSend = new LinkedBlockingQueue<AccelTime>();
     }
 
     public String accelsToJSON() {
