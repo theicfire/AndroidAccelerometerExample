@@ -120,7 +120,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                 HttpClient httpClient = new DefaultHttpClient();
                 try {
                     Log.d("mine", "Sending tts received");
-                    HttpPost request = new HttpPost("http://chaselambda.com:3000/tts-received");
+                    HttpPost request = new HttpPost("http://biker.chaselambda.com/tts-received");
                     request.addHeader("content-type", "application/json");
                     httpClient.execute(request);
                 } catch (Exception ex) {
@@ -296,7 +296,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 //                    HttpClient httpClient = new DefaultHttpClient();
 //                    try {
 //
-//                        HttpPost request = new HttpPost("http://chaselambda.com:3000/multi_accels/");
+//                        HttpPost request = new HttpPost("http://biker.chaselambda.com/multi_accels/");
 //                        Log.d("mine", "get JSON");
 //                        StringEntity params = new StringEntity(accelQueue.accelsToJSON());
 //                        Log.d("mine", "got JSON");

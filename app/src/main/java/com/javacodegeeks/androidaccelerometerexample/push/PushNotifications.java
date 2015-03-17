@@ -227,7 +227,7 @@ public class PushNotifications {
      */
     private void sendRegistrationIdToBackend() {
         HttpClient httpClient = new DefaultHttpClient();
-        String attempt = "http://chaselambda.com:3000/regid/" + regid;
+        String attempt = "http://biker.chaselambda.com/regid/" + regid;
         Log.d("mine", "attempt is " + attempt);
         HttpPost request = new HttpPost(attempt);
         Log.d("mine", "sending regidddd of " + regid);

@@ -25,7 +25,7 @@ public class MyMeteor implements MeteorCallback {
 
     public MyMeteor(AndroidAccelerometerExample activity) {
         this.activity = activity;
-        mMeteor = new Meteor("ws://chaselambda.com:3000/websocket");
+        mMeteor = new Meteor("ws://biker.chaselambda.com/websocket");
         mMeteor.setCallback(this);
     }
 
@@ -117,6 +117,7 @@ public class MyMeteor implements MeteorCallback {
                         insertValues.put("accelsJson", activity.accelQueue.accelsToJSON());
                         Log.d(TAG, "Meteor insert!");
                         mMeteor.insert("batchAccels", insertValues);
+
                         Log.d(TAG, "Meteor insert done!");
                     } else {
                         Log.w(TAG, "Clearing accelsToSend, because meteor is not connected");
