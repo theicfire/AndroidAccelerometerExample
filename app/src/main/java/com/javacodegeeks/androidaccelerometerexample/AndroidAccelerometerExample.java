@@ -137,6 +137,10 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         super.onNewIntent(intent);
 //        setIntent(intent);//must store the new intent unless getIntent() will return the old one
         String intentText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        if (intentText == null) {
+            Log.e("mine", "Intent text equals null for some reason");
+            return;
+        }
         Log.d("mine", "Got intent text: " + intentText);
         if (intentText.equals("gps-off")) {
             locationMonitor.gpsOff();
@@ -252,19 +256,19 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 	// our threshold is MaxValue/2
 	public void maybeVibrate(float[] current) {
         if (maxAccelDifference(current) > vibrateThreshold) {
-            long curTime = System.currentTimeMillis();
             if (!alarmTriggered) {
                 alarmTriggered = true;
-                mMeteor.alarmTrigger();
                 Log.d("mine", "Actual notify. Sending sms!");
                 if (isProduction) {
-                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
+//                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
+                    ttobj.speak("rough", TextToSpeech.QUEUE_FLUSH, null);
 //                    Date date = new Date();
 //                    SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
                     Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
                 } else {
                     v.vibrate(50);
                 }
+                mMeteor.alarmTrigger();
                 locationMonitor.gpsOn();
             }
             updateNotifyTimeRangeView();
