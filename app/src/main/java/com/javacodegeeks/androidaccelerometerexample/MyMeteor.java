@@ -32,7 +32,7 @@ public class MyMeteor implements MeteorCallback {
 
     public MyMeteor(AndroidAccelerometerExample activity) {
         this.activity = activity;
-        mMeteor = new Meteor("ws://10.1.10.139:3000/websocket");
+        mMeteor = new Meteor("ws://biker.chaselambda.com/websocket");
         mMeteor.setCallback(this);
     }
 
@@ -122,7 +122,7 @@ public class MyMeteor implements MeteorCallback {
         public void postData() {
             HttpClient httpClient = new DefaultHttpClient();
             try {
-                HttpPost request = new HttpPost("http://10.1.10.139:3000/triggerAlarm");
+                HttpPost request = new HttpPost("http://biker.chaselambda.com/triggerAlarm");
                 HttpResponse response = httpClient.execute(request);
             }catch (Exception ex) {
                 // handle exception here
@@ -144,19 +144,21 @@ public class MyMeteor implements MeteorCallback {
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
-                    if (mMeteor.isConnected()) {
-                        Log.d(TAG, "connected, sending data");
-                        Map<String, Object> insertValues = new HashMap<String, Object>();
-                        // Potentially blocking! Nonzero JSON entries guaranteed.
-                        insertValues.put("accelsJson", activity.accelQueue.accelsToJSON());
-                        insertValues.put("createdAt", System.currentTimeMillis());
-                        Log.d(TAG, "Meteor insert!");
-                        mMeteor.insert("batchAccels", insertValues);
+                    if (activity.alarmTriggered) {
+                        if (mMeteor.isConnected()) {
+                            Log.d(TAG, "connected, sending data");
+                            Map<String, Object> insertValues = new HashMap<String, Object>();
+                            // Potentially blocking! Nonzero JSON entries guaranteed.
+                            insertValues.put("accelsJson", activity.accelQueue.accelsToJSON());
+                            insertValues.put("createdAt", System.currentTimeMillis());
+                            Log.d(TAG, "Meteor insert!");
+                            mMeteor.insert("batchAccels", insertValues);
 
-                        Log.d(TAG, "Meteor insert done!");
-                    } else {
-                        Log.w(TAG, "Clearing accelsToSend, because meteor is not connected");
-                        activity.accelQueue.accelsToSend.clear();
+                            Log.d(TAG, "Meteor insert done!");
+                        } else {
+                            Log.w(TAG, "Clearing accelsToSend, because meteor is not connected");
+                            activity.accelQueue.accelsToSend.clear();
+                        }
                     }
                 }
             }

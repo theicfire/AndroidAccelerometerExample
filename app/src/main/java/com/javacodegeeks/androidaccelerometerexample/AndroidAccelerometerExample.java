@@ -1,14 +1,17 @@
 package com.javacodegeeks.androidaccelerometerexample;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
@@ -37,7 +40,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class AndroidAccelerometerExample extends Activity implements SensorEventListener, TextToSpeech.OnInitListener {
 
-	private SensorManager sensorManager;
+    public static final String TAG = AndroidAccelerometerExample.class.getName();
+
+    private SensorManager sensorManager;
 	private Sensor accelerometer;
 
     private Queue<float[]> sensorEventQueue;
@@ -60,8 +65,48 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     private LocationMonitor locationMonitor;
 
     private boolean isProduction = false;
-    private boolean alarmTriggered = false;
+    public boolean alarmTriggered = false;
     private PBullet pbullet;
+
+    public static final int SCREEN_OFF_RECEIVER_DELAY = 500;
+
+    private PowerManager.WakeLock mWakeLock = null;
+
+    /*
+ * Register this as a sensor event listener.
+ */
+    private void registerListener() {
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    /*
+     * Un-register this as a sensor event listener.
+     */
+    private void unregisterListener() {
+        sensorManager.unregisterListener(this);
+    }
+
+    public BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "onReceive("+intent+")");
+
+            if (!intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                return;
+            }
+
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    Log.i(TAG, "Runnable executing.");
+                    unregisterListener();
+                    registerListener();
+                }
+            };
+
+            new Handler().postDelayed(runnable, SCREEN_OFF_RECEIVER_DELAY);
+        }
+    };
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -75,8 +120,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 		if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
 			// success! we have an accelerometer
 
-			accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-			sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+			registerListener();
 			vibrateThreshold = (float) .5;
 		} else {
 			// fail! we dont have an accelerometer!
@@ -103,6 +147,14 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
         ttobj = new TextToSpeech(getApplicationContext(), this);
         pbullet = new PBullet();
+
+        PowerManager manager =
+                (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock.acquire(); // TODO should this be in onCreate?
+
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+
     }
 
     @Override
@@ -120,7 +172,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                 HttpClient httpClient = new DefaultHttpClient();
                 try {
                     Log.d("mine", "Sending tts received");
-                    HttpPost request = new HttpPost("http://10.1.10.139:3000/tts-received");
+                    HttpPost request = new HttpPost("http://biker.chaselambda.com/tts-received");
                     request.addHeader("content-type", "application/json");
                     httpClient.execute(request);
                 } catch (Exception ex) {
@@ -337,6 +389,9 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     public void onDestroy() {
         super.onDestroy();
         mMeteor.mMeteor.disconnect();
+        unregisterReceiver(mReceiver);
+        unregisterListener();
+        mWakeLock.release();
     }
 
 
