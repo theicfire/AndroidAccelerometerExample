@@ -68,8 +68,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     public boolean alarmTriggered = false;
     private PBullet pbullet;
 
-    public static final int SCREEN_OFF_RECEIVER_DELAY = 500;
-
     private PowerManager.WakeLock mWakeLock = null;
 
     /*
@@ -86,27 +84,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     private void unregisterListener() {
         sensorManager.unregisterListener(this);
     }
-
-    public BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i(TAG, "onReceive("+intent+")");
-
-            if (!intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                return;
-            }
-
-            Runnable runnable = new Runnable() {
-                public void run() {
-                    Log.i(TAG, "Runnable executing.");
-                    unregisterListener();
-                    registerListener();
-                }
-            };
-
-            new Handler().postDelayed(runnable, SCREEN_OFF_RECEIVER_DELAY);
-        }
-    };
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -153,7 +130,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         mWakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.acquire(); // TODO should this be in onCreate?
 
-        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 
     }
 
@@ -389,7 +365,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     public void onDestroy() {
         super.onDestroy();
         mMeteor.mMeteor.disconnect();
-        unregisterReceiver(mReceiver);
         unregisterListener();
         mWakeLock.release();
     }
