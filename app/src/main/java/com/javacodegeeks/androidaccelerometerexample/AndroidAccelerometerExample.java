@@ -120,7 +120,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                 HttpClient httpClient = new DefaultHttpClient();
                 try {
                     Log.d("mine", "Sending tts received");
-                    HttpPost request = new HttpPost("http://biker.chaselambda.com/tts-received");
+                    HttpPost request = new HttpPost("http://10.1.10.139:3000/tts-received");
                     request.addHeader("content-type", "application/json");
                     httpClient.execute(request);
                 } catch (Exception ex) {
@@ -265,13 +265,13 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                     ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
 //                    ttobj.speak("rough", TextToSpeech.QUEUE_FLUSH, null);
 
+                    pbullet.send("Phone moved!", "At " + date.toString());
                     SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null,null);
                     Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
                 } else {
                     v.vibrate(50);
                 }
                 mMeteor.alarmTrigger();
-                pbullet.send("Phone moved!", "At " + date.toString());
                 locationMonitor.gpsOn();
             }
             updateNotifyTimeRangeView();

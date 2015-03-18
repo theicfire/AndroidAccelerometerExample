@@ -1,6 +1,13 @@
 package com.javacodegeeks.androidaccelerometerexample;
 
+import android.location.Location;
+import android.os.AsyncTask;
 import android.util.Log;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -25,7 +32,7 @@ public class MyMeteor implements MeteorCallback {
 
     public MyMeteor(AndroidAccelerometerExample activity) {
         this.activity = activity;
-        mMeteor = new Meteor("ws://biker.chaselambda.com/websocket");
+        mMeteor = new Meteor("ws://10.1.10.139:3000/websocket");
         mMeteor.setCallback(this);
     }
 
@@ -91,12 +98,39 @@ public class MyMeteor implements MeteorCallback {
     }
 
     public void alarmTrigger() {
-        Map<String, Object> insertValues = new HashMap<String, Object>();
-        // Potentially blocking! Nonzero JSON entries guaranteed.
-        insertValues.put("androidTime", System.currentTimeMillis());
-        Log.d(TAG, "Meteor alert!");
-        mMeteor.insert("alarms", insertValues);
-        Log.d(TAG, "Meteor alert done");
+//        Map<String, Object> query= new HashMap<String, Object>();
+//        query.put("_id", "zXHhuCCtXNkXK6EZ");
+//        Map<String, Object> update = new HashMap<String, Object>();
+//        // Potentially blocking! Nonzero JSON entries guaranteed.
+//        update.put("_id", "zXHhuCCtXNkXK6EZ");
+//        update.put("name", "alarmSet");
+//        update.put("value", false);
+//        Log.d(TAG, "Meteor alert!");
+//        mMeteor.update("other", query, update);
+//        Log.d(TAG, "Meteor alert done");
+        new MyAsyncTask().execute();
+    }
+
+    private class MyAsyncTask extends AsyncTask<Location, Integer, String> {
+
+        @Override
+        protected String doInBackground(Location... params) {
+            postData();
+            return null;
+        }
+
+        public void postData() {
+            HttpClient httpClient = new DefaultHttpClient();
+            try {
+                HttpPost request = new HttpPost("http://10.1.10.139:3000/triggerAlarm");
+                HttpResponse response = httpClient.execute(request);
+            }catch (Exception ex) {
+                // handle exception here
+                Log.d("mine", "FAILED request");
+            } finally {
+                httpClient.getConnectionManager().shutdown();
+            }
+        }
     }
 
     public void meteorSender() {
@@ -115,6 +149,7 @@ public class MyMeteor implements MeteorCallback {
                         Map<String, Object> insertValues = new HashMap<String, Object>();
                         // Potentially blocking! Nonzero JSON entries guaranteed.
                         insertValues.put("accelsJson", activity.accelQueue.accelsToJSON());
+                        insertValues.put("createdAt", System.currentTimeMillis());
                         Log.d(TAG, "Meteor insert!");
                         mMeteor.insert("batchAccels", insertValues);
 
