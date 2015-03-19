@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.javacodegeeks.androidaccelerometerexample"
-        minSdkVersion 9
+        minSdkVersion 18
         targetSdkVersion 19
     }
 
