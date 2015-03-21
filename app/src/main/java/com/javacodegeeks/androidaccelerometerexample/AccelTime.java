@@ -9,10 +9,10 @@ import org.json.JSONException;
  * Created by chase on 3/6/15.
  */
 public class AccelTime {
-    private float x;
-    private float y;
-    private float z;
-    private long time;
+    public float x;
+    public float y;
+    public float z;
+    public long time;
 
     public AccelTime(float x, float y, float z, long time) {
         this.x = x;

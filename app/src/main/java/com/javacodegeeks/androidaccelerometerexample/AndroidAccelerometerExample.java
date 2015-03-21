@@ -63,7 +63,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     private SensorManager sensorManager;
     private Sensor accelerometer;
 
-    private Queue<float[]> sensorEventQueue;
+    private Queue<AccelTime> sensorEventQueue;
 
     private float vibrateThreshold = 0;
     private Handler mHandler;
@@ -72,13 +72,12 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     private TextView countView, notifyTimeRangeView;
 
-    public Vibrator v;
-    TextToSpeech ttobj;
+    private Vibrator v;
+    private TextToSpeech ttobj;
 
     private MyMeteor mMeteor;
 
     public AccelQueue accelQueue;
-
 
     private LocationMonitor locationMonitor;
 
@@ -89,67 +88,45 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     private PowerManager.WakeLock mWakeLock = null;
     private BleActivityComponent mBle;
 
-    /*
- * Register this as a sensor event listener.
- */
-    private void registerListener() {
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    /*
-     * Un-register this as a sensor event listener.
-     */
-    private void unregisterListener() {
-        sensorManager.unregisterListener(this);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        sensorEventQueue = new ConcurrentLinkedQueue<float[]>();
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null) {
+            Log.e(TAG, "No Accelerometer");
+            throw new AssertionError("crap");
+        }
+
+        sensorEventQueue = new ConcurrentLinkedQueue<AccelTime>();
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
         initializeViews();
-
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            // success! we have an accelerometer
-
-            registerListener();
-            vibrateThreshold = (float) .5;
-        } else {
-            // fail! we dont have an accelerometer!
-        }
-
-        //initialize vibration
+        registerListener();
+        vibrateThreshold = (float) .5;
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-
         count = 0;
-
         setupTimeUpdate();
-
         accelQueue = new AccelQueue();
-
         ttobj = new TextToSpeech(getApplicationContext(), this);
-
         mMeteor = new MyMeteor(this);
-
-        Log.d("mine", "Push creating, at the start");
-        PushNotifications pusher = new PushNotifications(getApplicationContext(), this);
-
-
         locationMonitor = new LocationMonitor(this);
-
         ttobj = new TextToSpeech(getApplicationContext(), this);
         pbullet = new PBullet();
-
         PowerManager manager =
                 (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         // Needed to have accelerometer readings stay up to date, and not delay when the screen is off.
         mWakeLock.acquire();
         mBle = new BleActivityComponent(this);
+    }
+
+    private void registerListener() {
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    private void unregisterListener() {
+        sensorManager.unregisterListener(this);
     }
 
 
@@ -164,7 +141,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                //code to do the HTTP request
                 HttpClient httpClient = new DefaultHttpClient();
                 try {
                     Log.d("mine", "Sending tts received");
@@ -223,7 +199,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         if (alarmTriggered) {
             notifyTimeRangeView.setText("Alarm triggered!");
         } else {
-            notifyTimeRangeView.setText("Notification are sleeping");
+            notifyTimeRangeView.setText("Waiting for bump");
         }
     }
 
@@ -249,13 +225,13 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         }).start();
     }
 
-    private float maxAccelDifference(float[] current) {
+    private float maxAccelDifference(AccelTime current) {
         float ret = 0;
-        for (float[] arr : sensorEventQueue) {
+        for (AccelTime arr : sensorEventQueue) {
             ret = Math.max(ret, (float) Math.sqrt(
-                    Math.pow(arr[0] - current[0], 2) +
-                            Math.pow(arr[1] - current[1], 2) +
-                            Math.pow(arr[2] - current[2], 2)));
+                    Math.pow(arr.x - current.x, 2) +
+                            Math.pow(arr.y - current.y, 2) +
+                            Math.pow(arr.z - current.z, 2)));
         }
         return ret;
     }
@@ -263,21 +239,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     public void initializeViews() {
         countView = (TextView) findViewById(R.id.count);
         notifyTimeRangeView = (TextView) findViewById(R.id.notifyTimeRange);
-
-
     }
-
-    ////onResume() register the accelerometer for listening the events
-    //protected void onResume() {
-    //super.onResume();
-    //sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-    //}
-
-    ////onPause() unregister the accelerometer for stop listening the events
-    //protected void onPause() {
-    //super.onPause();
-    //sensorManager.unregisterListener(this);
-    //}
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -286,33 +248,23 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float[] current = {event.values[0], event.values[1], event.values[2]};
         AccelTime accelTime = new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis());
         accelQueue.accelsToSend.add(accelTime);
-
-
         count += 1;
-//        if (count % 10 == 0) {
-//            Log.d("mine", accelsToJSON());
-//            Log.d("mine", "Attempt to send at count " + count);
-////            Arrays.fill(accelsToSend, (float) 0);
-//        }
         countView.setText(Integer.toString(count));
-        maybeVibrate(current); // TODO bring back
+        maybeVibrate(accelTime); // TODO bring back
     }
 
     // if the change in the accelerometer value is big enough, then vibrate!
     // our threshold is MaxValue/2
-    public void maybeVibrate(float[] current) {
-        if (maxAccelDifference(current) > vibrateThreshold) {
+    public void maybeVibrate(AccelTime accelTime) {
+        if (maxAccelDifference(accelTime) > vibrateThreshold) {
             if (!alarmTriggered) {
                 alarmTriggered = true;
                 Log.d("mine", "Actual notify. Sending sms!");
                 Date date = new Date();
                 if (isProduction) {
                     ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
-//                    ttobj.speak("rough", TextToSpeech.QUEUE_FLUSH, null);
-
                     pbullet.send("Phone moved!", "At " + date.toString());
                     SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null, null);
                     Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
@@ -328,7 +280,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             Log.d("mine", "Diff is great enough!");
             sensorEventQueue.clear();
         }
-        sensorEventQueue.add(current);
+        sensorEventQueue.add(accelTime);
         if (sensorEventQueue.size() > 100) {
             sensorEventQueue.poll();
         }
