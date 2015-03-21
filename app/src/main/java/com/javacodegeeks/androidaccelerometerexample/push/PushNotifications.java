@@ -67,10 +67,11 @@ public class PushNotifications {
     Activity activity;
 
     public PushNotifications(Context context, Activity activity) {
-
         this.activity = activity;
         this.context = context;
-        // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
+    }
+
+    public void runRegisterInBackground() {
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(activity);
             regid = getRegistrationId(context);
@@ -84,7 +85,7 @@ public class PushNotifications {
                 Log.e("===","=========================");
             }
         } else {
-            Log.i(TAG, "No valid Google Play Services APK found.");
+            Log.e(TAG, "No valid Google Play Services APK found.");
         }
     }
 

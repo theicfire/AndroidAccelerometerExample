@@ -1,58 +1,33 @@
 package com.javacodegeeks.androidaccelerometerexample;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.EditText;
-import android.widget.Toast;
 import android.telephony.SmsManager;
+import android.util.Log;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.javacodegeeks.androidaccelerometerexample.ble.BleActivityComponent;
-import com.javacodegeeks.androidaccelerometerexample.ble.DeviceListActivity;
-import com.javacodegeeks.androidaccelerometerexample.ble.UartService;
 import com.javacodegeeks.androidaccelerometerexample.push.PushNotifications;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -61,7 +36,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     public static final String TAG = "AndroidAccExample";
     private SensorManager sensorManager;
-    private Sensor accelerometer;
 
     private Queue<AccelTime> sensorEventQueue;
 
@@ -102,6 +76,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         setContentView(R.layout.activity_main);
         initializeViews();
         registerListener();
+        (new PushNotifications(getApplicationContext(), this)).runRegisterInBackground();
         vibrateThreshold = (float) .5;
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         count = 0;
@@ -121,7 +96,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     }
 
     private void registerListener() {
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
@@ -252,7 +227,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         accelQueue.accelsToSend.add(accelTime);
         count += 1;
         countView.setText(Integer.toString(count));
-        maybeVibrate(accelTime); // TODO bring back
+        maybeVibrate(accelTime);
     }
 
     // if the change in the accelerometer value is big enough, then vibrate!
@@ -266,7 +241,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                 if (isProduction) {
                     ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
                     pbullet.send("Phone moved!", "At " + date.toString());
-                    SmsManager.getDefault().sendTextMessage("5125778778", null, "Phone moved -- " + date.toString(), null, null);
+                    SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved -- " + date.toString(), null, null);
                     Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
                 } else {
                     v.vibrate(50);
@@ -363,7 +338,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         if (!mBle.mBtAdapter.isEnabled()) {
             Log.i(TAG, "onResume - BT not enabled yet");
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            this.startActivityForResult(enableIntent, mBle.REQUEST_ENABLE_BT);
+            this.startActivityForResult(enableIntent, BleActivityComponent.REQUEST_ENABLE_BT);
         }
 
     }

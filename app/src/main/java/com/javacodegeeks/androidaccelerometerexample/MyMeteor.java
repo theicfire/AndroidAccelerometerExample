@@ -4,16 +4,12 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import im.delight.android.ddp.Meteor;
 import im.delight.android.ddp.MeteorCallback;
@@ -24,11 +20,9 @@ import im.delight.android.ddp.MeteorCallback;
 public class MyMeteor implements MeteorCallback {
     static final String TAG = "MyMeteor";
     public Meteor mMeteor;
-    private boolean started = false;
     AndroidAccelerometerExample activity;
     private boolean reconnecting = false;
     private boolean meteorSenderStarted = false;
-//    private Lock lock = new ReentrantLock();
 
     public MyMeteor(AndroidAccelerometerExample activity) {
         this.activity = activity;
@@ -123,7 +117,7 @@ public class MyMeteor implements MeteorCallback {
             HttpClient httpClient = new DefaultHttpClient();
             try {
                 HttpPost request = new HttpPost("http://biker.chaselambda.com/triggerAlarm");
-                HttpResponse response = httpClient.execute(request);
+                httpClient.execute(request);
             }catch (Exception ex) {
                 // handle exception here
                 Log.d("mine", "FAILED request");

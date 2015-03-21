@@ -27,8 +27,6 @@ public class LocationMonitor implements
 
     public GoogleApiClient mGoogleApiClient;
 
-    private LocationRequest mLocationRequest;
-
     public LocationMonitor(Activity activity) {
         Log.d("mine", "making location monitor");
         mGoogleApiClient = new GoogleApiClient.Builder(activity)
@@ -42,7 +40,7 @@ public class LocationMonitor implements
     public void onConnected(Bundle bundle) {
         Log.d("mine", "connected brah");
 
-        mLocationRequest = LocationRequest.create();
+        LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(10000);
 
@@ -78,12 +76,9 @@ public class LocationMonitor implements
             HttpClient httpClient = new DefaultHttpClient();
             try {
                 HttpPost request = new HttpPost("http://chasegps.meteor.com/add_coords/" + loc.getLatitude() + "/" + loc.getLongitude() + "/" + System.currentTimeMillis());
-                HttpResponse response = httpClient.execute(request);
-//                response.getStatusLine().getStatusCode();
+                httpClient.execute(request);
                 Log.d("mine", "SUCCESS request");
-                // handle response here...
             }catch (Exception ex) {
-                // handle exception here
                 Log.d("mine", "FAILED request");
             } finally {
                 httpClient.getConnectionManager().shutdown();

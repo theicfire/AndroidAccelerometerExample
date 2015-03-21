@@ -17,7 +17,6 @@ public class AccelQueue {
     }
 
     public String accelsToJSON() {
-//        return "{\"time\":" + System.currentTimeMillis() + "}";
         JSONArray ret = new JSONArray();
         AccelTime cur;
         try {
