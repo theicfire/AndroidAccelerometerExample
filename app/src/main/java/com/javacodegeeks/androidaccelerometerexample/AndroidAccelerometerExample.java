@@ -35,32 +35,22 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class AndroidAccelerometerExample extends Activity implements SensorEventListener, TextToSpeech.OnInitListener {
 
     public static final String TAG = "AndroidAccExample";
+    private final float vibrateThreshold = (float) .5;
     private SensorManager sensorManager;
-
     private Queue<AccelTime> sensorEventQueue;
-
-    private float vibrateThreshold = 0;
     private Handler mHandler;
-
     private int count;
-
     private TextView countView, notifyTimeRangeView;
-
     private Vibrator v;
     private TextToSpeech ttobj;
-
     private MyMeteor mMeteor;
-
-    public AccelQueue accelQueue;
-
     private LocationMonitor locationMonitor;
-
     private boolean isProduction = false;
-    public boolean alarmTriggered = false;
     private PBullet pbullet;
-
-    private PowerManager.WakeLock mWakeLock = null;
+    private PowerManager.WakeLock mWakeLock;
     private BleActivityComponent mBle;
+    public boolean alarmTriggered = false;
+    public AccelQueue accelQueue;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,7 +67,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         initializeViews();
         registerListener();
         (new PushNotifications(getApplicationContext(), this)).runRegisterInBackground();
-        vibrateThreshold = (float) .5;
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         count = 0;
         setupTimeUpdate();
@@ -103,7 +92,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     private void unregisterListener() {
         sensorManager.unregisterListener(this);
     }
-
 
     @Override
     public void onInit(int status) {
