@@ -21,19 +21,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import com.javacodegeeks.androidaccelerometerexample.Utils;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -227,19 +220,6 @@ public class PushNotifications {
      * to a server that echoes back the message using the 'from' address in the message.
      */
     private void sendRegistrationIdToBackend() {
-        HttpClient httpClient = new DefaultHttpClient();
-        String attempt = "http://biker.chaselambda.com/regid/" + regid;
-        Log.d("mine", "attempt is " + attempt);
-        HttpPost request = new HttpPost(attempt);
-        Log.d("mine", "sending regidddd of " + regid);
-        try {
-            httpClient.execute(request);
-        } catch (Exception ex) {
-            // handle exception here
-            Log.d("mine", ex.toString());
-        } finally {
-            httpClient.getConnectionManager().shutdown();
-        }
-        Log.d("mine", "done sending regid");
+        Utils.postReq("http://biker.chaselambda.com/regid/" + regid);
     }
 }

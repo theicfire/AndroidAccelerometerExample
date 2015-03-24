@@ -29,12 +29,6 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.javacodegeeks.androidaccelerometerexample.AndroidAccelerometerExample;
 import com.javacodegeeks.androidaccelerometerexample.UKTextToSpeech;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import java.util.Locale;
 
 /**

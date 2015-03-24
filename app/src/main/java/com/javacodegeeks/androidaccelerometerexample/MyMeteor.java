@@ -1,12 +1,6 @@
 package com.javacodegeeks.androidaccelerometerexample;
 
-import android.location.Location;
-import android.os.AsyncTask;
 import android.util.Log;
-
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -102,29 +96,7 @@ public class MyMeteor implements MeteorCallback {
 //        Log.d(TAG, "Meteor alert!");
 //        mMeteor.update("other", query, update);
 //        Log.d(TAG, "Meteor alert done");
-        new MyAsyncTask().execute();
-    }
-
-    private class MyAsyncTask extends AsyncTask<Location, Integer, String> {
-
-        @Override
-        protected String doInBackground(Location... params) {
-            postData();
-            return null;
-        }
-
-        public void postData() {
-            HttpClient httpClient = new DefaultHttpClient();
-            try {
-                HttpPost request = new HttpPost("http://biker.chaselambda.com/triggerAlarm");
-                httpClient.execute(request);
-            }catch (Exception ex) {
-                // handle exception here
-                Log.d("mine", "FAILED request");
-            } finally {
-                httpClient.getConnectionManager().shutdown();
-            }
-        }
+        Utils.postReqTask("http://biker.chaselambda.com/triggerAlarm");
     }
 
     public void meteorSender() {

@@ -22,10 +22,6 @@ import android.widget.Toast;
 import com.javacodegeeks.androidaccelerometerexample.ble.BleActivityComponent;
 import com.javacodegeeks.androidaccelerometerexample.push.PushNotifications;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import java.util.Date;
 import java.util.Locale;
 import java.util.Queue;
@@ -100,27 +96,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         }
     }
 
-    private void sendTTSReceived() {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpClient httpClient = new DefaultHttpClient();
-                try {
-                    Log.d("mine", "Sending tts received");
-                    HttpPost request = new HttpPost("http://biker.chaselambda.com/tts-received");
-                    request.addHeader("content-type", "application/json");
-                    httpClient.execute(request);
-                } catch (Exception ex) {
-                    // handle exception here
-                    Log.d("mine", "FAILED request");
-                } finally {
-                    httpClient.getConnectionManager().shutdown();
-                }
-            }
-        });
-        thread.start();
-    }
-
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 //        setIntent(intent);//must store the new intent unless getIntent() will return the old one
@@ -159,7 +134,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         } else {
             ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
-        sendTTSReceived();
+        Utils.postReqTask("http://biker.chaselambda.com/tts-received");
     }
 
     private void updateNotifyTimeRangeView() {
@@ -253,56 +228,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         }
 
     }
-//
-//    private void startSendingServerData() {
-//        Thread thread = new Thread(new Runnable(){
-//            @Override
-//            public void run(){
-//                //code to do the HTTP request
-//                while (true) {
-//                    HttpClient httpClient = new DefaultHttpClient();
-//                    try {
-//
-//                        HttpPost request = new HttpPost("http://biker.chaselambda.com/multi_accels/");
-//                        Log.d("mine", "get JSON");
-//                        StringEntity params = new StringEntity(accelQueue.accelsToJSON());
-//                        Log.d("mine", "got JSON");
-//                        request.addHeader("content-type", "application/json");
-//                        request.setEntity(params);
-//                        Log.d("mine", "Attempt to send for count" + count);
-//                        HttpResponse response = httpClient.execute(request);
-////                response.getStatusLine().getStatusCode();
-//                        Log.d("mine", "SUCCESS request for count " + count);
-//
-//                    } catch (Exception ex) {
-//                        // handle exception here
-//                        Log.d("mine", "FAILED request");
-//                    } finally {
-//                        httpClient.getConnectionManager().shutdown();
-//                    }
-//                }
-//            }
-//        });
-//        thread.start();
-//    }
-
-//    @Override
-//    protected void onStart() {
-//        super.onStart();
-//        Log.d("mine", "onstart called");
-//        locationMonitor.mGoogleApiClient.connect();
-//        Log.d("mine", "THEN CALLED connect()");
-//    }
-
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//        Log.d(TAG, "STOP!");
-//        mWakeLock.release();
-//        mMeteor.mMeteor.disconnect();
-//        unregisterListener();
-////        locationMonitor.mGoogleApiClient.purposefulDisconnect(); // DON't stop, we want to run this in the background
-//    }
 
     @Override
     public void onDestroy() {
