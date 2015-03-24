@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.javacodegeeks.androidaccelerometerexample.AndroidAccelerometerExample;
 import com.javacodegeeks.androidaccelerometerexample.R;
+import com.javacodegeeks.androidaccelerometerexample.Utils;
 
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -173,6 +174,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                         edtMessage.setEnabled(true);
                         btnSend.setEnabled(true);
                         ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
+                        Utils.postReqTask("http://biker.chaselambda.com/bluetooth/on");
 //                        listAdapter.add("["+currentDateTimeString+"] Connected to: "+ mDevice.getName());
 //                        messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
                         mState = UART_PROFILE_CONNECTED;
@@ -190,6 +192,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                         edtMessage.setEnabled(false);
                         btnSend.setEnabled(false);
                         ((TextView) activity.findViewById(R.id.deviceName)).setText("Not Connected");
+                        Utils.postReqTask("http://biker.chaselambda.com/bluetooth/off");
 //                        listAdapter.add("["+currentDateTimeString+"] Disconnected to: "+ mDevice.getName());
                         mState = UART_PROFILE_DISCONNECTED;
                         mService.close();
