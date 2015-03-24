@@ -206,7 +206,8 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
                 Log.d("mine", "Actual notify. Sending sms!");
                 Date date = new Date();
                 if (isProduction) {
-                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
+//                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
+                    ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it is equipped with tracking equipment, internet connectivity, and a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
                     pbullet.send("Phone moved!", "At " + date.toString());
                     SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved -- " + date.toString(), null, null);
                     Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
