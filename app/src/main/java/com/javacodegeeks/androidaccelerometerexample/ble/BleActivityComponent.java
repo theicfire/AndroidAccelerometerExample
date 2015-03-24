@@ -135,12 +135,12 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
     public ServiceConnection mServiceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder rawBinder) {
             mService = ((UartService.LocalBinder) rawBinder).getService();
+
             Log.d(TAG, "onServiceConnected mService= " + mService);
             if (!mService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
                 activity.finish();
             }
-
         }
 
         public void onServiceDisconnected(ComponentName classname) {
@@ -157,6 +157,30 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
 //
 //        }
 //    };
+    public void reconnect() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // TODO I'd love to have some callback on the attempted reconnect to know if the reconnect failed or not.
+                // But UartService doesn't seem to tell us when the reconnect attempt failed...
+                if (mState == UART_PROFILE_DISCONNECTED && activity.alarmTriggered) {
+                    try {
+                        Thread.sleep(4000);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                    Log.d(TAG, "Reconnecting bluetooth");
+                    activity.runOnUiThread(new Runnable() {
+                        public void run() {
+                            arduinoConnect();
+                        }
+                    });
+                }
+            }
+        });
+        thread.start();
+
+    }
 
     public final BroadcastReceiver UARTStatusChangeReceiver = new BroadcastReceiver() {
 
@@ -166,20 +190,10 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
             final Intent mIntent = intent;
             //*********************//
             if (action.equals(UartService.ACTION_GATT_CONNECTED)) {
-                activity.runOnUiThread(new Runnable() {
-                    public void run() {
-                        String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-                        Log.d(TAG, "UART_CONNECT_MSG");
-                        btnConnectDisconnect.setText("Disconnect");
-                        edtMessage.setEnabled(true);
-                        btnSend.setEnabled(true);
-                        ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
-                        Utils.postReqTask("http://biker.chaselambda.com/bluetooth/on");
-//                        listAdapter.add("["+currentDateTimeString+"] Connected to: "+ mDevice.getName());
-//                        messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
-                        mState = UART_PROFILE_CONNECTED;
-                    }
-                });
+                // TODO this callback is not accurate. If I tell the arduino to say something whenever it connects,
+                // there can be a significant delay between when this is hit and when the message from the arduino
+                // is received.
+                Log.d(TAG, "Almost connected");
             }
 
             //*********************//
@@ -196,6 +210,10 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
 //                        listAdapter.add("["+currentDateTimeString+"] Disconnected to: "+ mDevice.getName());
                         mState = UART_PROFILE_DISCONNECTED;
                         mService.close();
+
+//                        reconnect();
+                        arduinoConnect();
+
                         //setUiState();
 
                     }
@@ -219,6 +237,23 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
 //                            listAdapter.add("["+currentDateTimeString+"] RX: "+text);
 //                            messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
 
+
+                            if ("connected".equals(text)) {
+                                activity.runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
+                                        Log.d(TAG, "UART_CONNECT_MSG");
+                                        btnConnectDisconnect.setText("Disconnect");
+                                        edtMessage.setEnabled(true);
+                                        btnSend.setEnabled(true);
+                                        ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
+                                        Utils.postReqTask("http://biker.chaselambda.com/bluetooth/on");
+//                        listAdapter.add("["+currentDateTimeString+"] Connected to: "+ mDevice.getName());
+//                        messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                                        mState = UART_PROFILE_CONNECTED;
+                                    }
+                                });
+                            }
                         } catch (Exception e) {
                             Log.e(TAG, e.toString());
                         }
