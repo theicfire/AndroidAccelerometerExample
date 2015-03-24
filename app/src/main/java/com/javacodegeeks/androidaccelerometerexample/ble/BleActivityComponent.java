@@ -82,18 +82,9 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                 }
                 else {
                     if (btnConnectDisconnect.getText().equals("Connect")){
-
-                        //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
-
-                        Intent newIntent = new Intent(activity, DeviceListActivity.class);
-                        activity.startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
+                        arduinoConnect();
                     } else {
-                        //Disconnect button pressed
-                        if (mDevice!=null)
-                        {
-                            mService.disconnect();
-
-                        }
+                        disconnect();
                     }
                 }
             }
@@ -121,6 +112,21 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
 
             }
         });
+    }
+
+    public void arduinoConnect() {
+        String deviceAddress = "D8:8C:7B:9F:AA:5B";
+        mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress);
+
+        ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - connecting");
+
+        mService.connect(deviceAddress);
+    }
+
+    public void disconnect() {
+        if (mDevice!=null) {
+            mService.disconnect();
+        }
     }
 
 
@@ -257,7 +263,6 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                     Log.d(TAG, "... onActivityResultdevice.address==" + mDevice + "mserviceValue" + mService);
                     ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - connecting");
                     Log.d(TAG, "deviceAddress " + deviceAddress);
-                    // Answer: FC:27:63:5A:67:7D
                     mService.connect(deviceAddress);
 
 

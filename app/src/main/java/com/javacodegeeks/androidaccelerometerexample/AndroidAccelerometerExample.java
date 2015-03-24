@@ -152,6 +152,10 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             mMeteor.alarmTrigger();
             ttobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
             locationMonitor.gpsOn();
+        } else if (intentText.equals("bt-on")) {
+            mBle.arduinoConnect();
+        } else if (intentText.equals("bt-off")) {
+            mBle.disconnect();
         } else {
             ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
