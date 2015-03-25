@@ -5,5 +5,6 @@ package com.javacodegeeks.androidaccelerometerexample.detector;
  */
 public interface Alertable {
     void sendMiniAlert();
+    void unsetMiniAlert();
     void sendExcessiveAlert();
 }

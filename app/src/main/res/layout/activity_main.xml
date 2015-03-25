@@ -34,16 +34,33 @@
         android:layout_gravity="center"
         android:layout_marginBottom="10dp"
         android:layout_marginTop="20dp"
-        android:text="SMS Notify Time Range"
+        android:text="Trigger State"
         android:textSize="15dp" />
 
     <TextView
-        android:id="@+id/notifyTimeRange"
+        android:id="@+id/triggerStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="0dp"
         android:text="Waiting for bump"
+        android:textSize="20dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="20dp"
+        android:text="Excessive Alert Status"
+        android:textSize="15dp" />
+
+    <TextView
+        android:id="@+id/excessiveAlertStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="0dp"
+        android:text="Need first bump"
         android:textSize="20dp" />
 
     <LinearLayout

@@ -1,7 +1,6 @@
 package com.javacodegeeks.androidaccelerometerexample;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
@@ -73,7 +72,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         mWakeLock.acquire();
         mBle = new BleActivityComponent(this);
         initializeViews();
-        coolDetector = new CoolDetector(this);
+        coolDetector = new CoolDetector(this, (TextView) findViewById(R.id.excessiveAlertStatus));
         count = 0;
     }
 
@@ -92,7 +91,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     private void initializeViews() {
         countView = (TextView) findViewById(R.id.count);
-        notifyTimeRangeView = (TextView) findViewById(R.id.notifyTimeRange);
+        notifyTimeRangeView = (TextView) findViewById(R.id.triggerStatus);
     }
 
     private void unregisterListener() {
@@ -168,24 +167,36 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     @Override
     public void sendMiniAlert() {
+        if (!alarmTriggered) {
+            setAlarmTriggered(true);
+            Log.d("mine", "Sending mini alert.");
+            if (isProduction) {
+                Date date = new Date();
+                pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
+            } else {
+                v.vibrate(50);
+            }
+        }
+    }
+
+    @Override
+    public void unsetMiniAlert() {
+        setAlarmTriggered(false);
 
     }
 
     @Override
     public void sendExcessiveAlert() {
-        if (!alarmTriggered) {
-            setAlarmTriggered(true);
-            Log.d("mine", "Actual notify. Sending sms!");
-            Date date = new Date();
-            if (isProduction) {
+        Log.d("mine", "Excessive notify.");
+        Date date = new Date();
+        if (isProduction) {
 //                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
-                ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it is equipped with tracking equipment, internet connectivity, and a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
-                pbullet.send("Phone moved!", "At " + date.toString());
-                SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved -- " + date.toString(), null, null);
-                Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
-            } else {
-                v.vibrate(50);
-            }
+            ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it is equipped with tracking equipment, internet connectivity, and a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
+            pbullet.send("Phone moved!", "At " + date.toString());
+            SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved -- " + date.toString(), null, null);
+            Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
+        } else {
+            v.vibrate(500);
         }
     }
 
