@@ -130,6 +130,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             setAlarmTriggered(false);
         } else if (intentText.equals("alarm-trigger")) {
             setAlarmTriggered(true);
+            sendExcessiveAlert();
             ttobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
         } else if (intentText.equals("bt-on")) {
             mBle.arduinoConnect();
@@ -145,7 +146,6 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         alarmTriggered = t;
         if (t) {
             locationMonitor.gpsOn();
-            mMeteor.alarmTrigger();
         } else {
             locationMonitor.gpsOff();
             coolDetector.reset();
@@ -172,6 +172,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             Log.d("mine", "Sending mini alert.");
             if (isProduction) {
                 Date date = new Date();
+                ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it is equipped with tracking equipment, internet connectivity, and a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
             } else {
                 v.vibrate(50);
@@ -189,12 +190,12 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     public void sendExcessiveAlert() {
         Log.d("mine", "Excessive notify.");
         Date date = new Date();
+        mMeteor.alarmTrigger();
         if (isProduction) {
 //                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
-            ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it is equipped with tracking equipment, internet connectivity, and a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
-            pbullet.send("Phone moved!", "At " + date.toString());
-            SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved -- " + date.toString(), null, null);
-            Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
+            pbullet.send("Phone moved LOTS!", "At " + date.toString());
+            SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved LOTS -- " + date.toString(), null, null);
+//            Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
         } else {
             v.vibrate(500);
         }
