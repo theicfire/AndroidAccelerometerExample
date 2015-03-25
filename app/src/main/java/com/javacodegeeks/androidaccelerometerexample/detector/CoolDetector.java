@@ -7,6 +7,7 @@ import android.widget.TextView;
 import com.javacodegeeks.androidaccelerometerexample.AccelQueue;
 import com.javacodegeeks.androidaccelerometerexample.AccelTime;
 
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -18,20 +19,27 @@ public class CoolDetector {
     private final float vibrateThreshold = (float) .5;
     private Queue<AccelTime> accelQueueDetector;
     public AccelQueue accelQueueMeteor;
+    private Queue<Long> movementTimesQueue;
     private Alertable alert;
     private Handler mHandler;
+    private static final int MAX_NOTIFY_DELTA = 20 * 1000;
+    private static final int MIN_NOTIFY_DELTA = 5 * 1000;
 
     public CoolDetector(Alertable alert) {
         this.alert = alert;
         startTimeRangeViewUpdate();
         accelQueueDetector = new ConcurrentLinkedQueue<AccelTime>();
         accelQueueMeteor = new AccelQueue();
+        movementTimesQueue = new LinkedList<Long>();
+
     }
 
     public void add(AccelTime accelTime) {
         if (maxAccelDifference(accelTime) > vibrateThreshold) {
             Log.d("mine", "Diff is great enough!");
-            alert.sendExcessiveAlert();
+            if (shouldNotify(System.currentTimeMillis())) {
+                alert.sendExcessiveAlert();
+            }
         }
         accelQueueDetector.add(accelTime);
         accelQueueMeteor.accelsToSend.add(accelTime);
@@ -43,6 +51,26 @@ public class CoolDetector {
 
     public void reset() {
         accelQueueDetector.clear();
+    }
+
+    public boolean shouldNotify(long millis) {
+        movementTimesQueue.add(millis);
+        if (shouldNotifyIfAdded(millis)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean shouldNotifyIfAdded(long millis) {
+        // clear queue
+        while (movementTimesQueue.peek() != null && movementTimesQueue.peek() < millis - MAX_NOTIFY_DELTA) {
+            movementTimesQueue.remove();
+        }
+
+        if (movementTimesQueue.peek() != null && movementTimesQueue.peek() < millis - MIN_NOTIFY_DELTA) {
+            return true;
+        }
+        return false;
     }
 
     private void startTimeRangeViewUpdate() {
