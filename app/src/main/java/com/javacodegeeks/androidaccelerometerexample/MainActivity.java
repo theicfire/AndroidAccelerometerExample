@@ -16,10 +16,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.javacodegeeks.androidaccelerometerexample.ble.BleActivityComponent;
-import com.javacodegeeks.androidaccelerometerexample.detector.CoolDetector;
+import com.javacodegeeks.androidaccelerometerexample.detector.MovementDetector;
 import com.javacodegeeks.androidaccelerometerexample.detector.Alertable;
 import com.javacodegeeks.androidaccelerometerexample.push.PushNotifications;
 
@@ -27,7 +26,7 @@ import java.util.Date;
 import java.util.Locale;
 
 
-public class AndroidAccelerometerExample extends Activity implements SensorEventListener, TextToSpeech.OnInitListener, Alertable {
+public class MainActivity extends Activity implements SensorEventListener, TextToSpeech.OnInitListener, Alertable {
 
     public static final String TAG = "AndroidAccExample";
     private SensorManager sensorManager;
@@ -40,7 +39,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
     private PowerManager.WakeLock mWakeLock;
     private BleActivityComponent mBle;
     public boolean alarmTriggered = false;
-    public CoolDetector coolDetector;
+    public MovementDetector movementDetector;
     private TextView countView, notifyTimeRangeView;
     private int count;
 
@@ -72,7 +71,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
         mWakeLock.acquire();
         mBle = new BleActivityComponent(this);
         initializeViews();
-        coolDetector = new CoolDetector(this, (TextView) findViewById(R.id.excessiveAlertStatus));
+        movementDetector = new MovementDetector(this, (TextView) findViewById(R.id.excessiveAlertStatus));
         count = 0;
     }
 
@@ -148,7 +147,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
             locationMonitor.gpsOn();
         } else {
             locationMonitor.gpsOff();
-            coolDetector.reset();
+            movementDetector.reset();
         }
         updateNotifyTimeRangeView();
     }
@@ -160,7 +159,7 @@ public class AndroidAccelerometerExample extends Activity implements SensorEvent
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        coolDetector.add(new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
+        movementDetector.add(new AccelTime(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
         count += 1;
         countView.setText(Integer.toString(count));
     }

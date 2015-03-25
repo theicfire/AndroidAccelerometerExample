@@ -14,11 +14,11 @@ import im.delight.android.ddp.MeteorCallback;
 public class MyMeteor implements MeteorCallback {
     static final String TAG = "MyMeteor";
     public Meteor mMeteor;
-    AndroidAccelerometerExample activity;
+    MainActivity activity;
     private boolean reconnecting = false;
     private boolean meteorSenderStarted = false;
 
-    public MyMeteor(AndroidAccelerometerExample activity) {
+    public MyMeteor(MainActivity activity) {
         this.activity = activity;
         mMeteor = new Meteor("ws://biker.chaselambda.com/websocket");
         mMeteor.setCallback(this);
@@ -115,7 +115,7 @@ public class MyMeteor implements MeteorCallback {
                             Log.d(TAG, "connected, sending data");
                             Map<String, Object> insertValues = new HashMap<String, Object>();
                             // Potentially blocking! Nonzero JSON entries guaranteed.
-                            insertValues.put("accelsJson", activity.coolDetector.accelQueueMeteor.accelsToJSON());
+                            insertValues.put("accelsJson", activity.movementDetector.accelQueueMeteor.accelsToJSON());
                             insertValues.put("createdAt", System.currentTimeMillis());
                             Log.d(TAG, "Meteor insert!");
                             mMeteor.insert("batchAccels", insertValues);
@@ -123,7 +123,7 @@ public class MyMeteor implements MeteorCallback {
                             Log.d(TAG, "Meteor insert done!");
                         } else {
                             Log.w(TAG, "Clearing accelsToSend, because meteor is not connected");
-                            activity.coolDetector.accelQueueMeteor.accelsToSend.clear();
+                            activity.movementDetector.accelQueueMeteor.accelsToSend.clear();
                         }
                     }
                 }

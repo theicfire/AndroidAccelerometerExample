@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created by chase on 3/25/15.
  */
-public class CoolDetector {
-    private final static String TAG = CoolDetector.class.getSimpleName();
+public class MovementDetector {
+    private final static String TAG = MovementDetector.class.getSimpleName();
     private final float vibrateThreshold = (float) .5;
     private Queue<AccelTime> accelQueueDetector;
     public AccelQueue accelQueueMeteor;
@@ -26,7 +26,7 @@ public class CoolDetector {
     private TextView excessiveAlertStatus;
     private boolean excessiveAlertTriggered;
 
-    public CoolDetector(Alertable alert, TextView excessiveAlertStatus) {
+    public MovementDetector(Alertable alert, TextView excessiveAlertStatus) {
         this.alert = alert;
         this.excessiveAlertStatus = excessiveAlertStatus;
         excessiveAlertTriggered = false;

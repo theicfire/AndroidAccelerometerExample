@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.res.Configuration;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -20,7 +19,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.javacodegeeks.androidaccelerometerexample.AndroidAccelerometerExample;
+import com.javacodegeeks.androidaccelerometerexample.MainActivity;
 import com.javacodegeeks.androidaccelerometerexample.R;
 import com.javacodegeeks.androidaccelerometerexample.Utils;
 
@@ -51,9 +50,9 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
 //    private ArrayAdapter<String> listAdapter;
     private Button btnConnectDisconnect,btnSend;
     private EditText edtMessage;
-    public final AndroidAccelerometerExample activity;
+    public final MainActivity activity;
 
-    public BleActivityComponent(AndroidAccelerometerExample act) {
+    public BleActivityComponent(MainActivity act) {
         this.activity = act;
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBtAdapter == null) {

@@ -26,10 +26,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.javacodegeeks.androidaccelerometerexample.AndroidAccelerometerExample;
-import com.javacodegeeks.androidaccelerometerexample.UKTextToSpeech;
-
-import java.util.Locale;
+import com.javacodegeeks.androidaccelerometerexample.MainActivity;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -77,7 +74,7 @@ public class GcmIntentService extends IntentService {
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 Log.i(TAG, "Received: " + extras.getString("text"));
 
-                Intent sendIntent = new Intent(getApplicationContext(),AndroidAccelerometerExample.class);
+                Intent sendIntent = new Intent(getApplicationContext(),MainActivity.class);
                 sendIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 sendIntent.setAction(Intent.ACTION_SEND);
                 sendIntent.putExtra(Intent.EXTRA_TEXT, extras.getString("text"));

@@ -1,14 +1,8 @@
 package com.javacodegeeks.androidaccelerometerexample.test;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.ActivityUnitTestCase;
-import android.test.InstrumentationTestCase;
-import android.widget.TextView;
 
-import com.javacodegeeks.androidaccelerometerexample.AndroidAccelerometerExample;
-import com.javacodegeeks.androidaccelerometerexample.R;
-
-import java.util.LinkedList;
+import com.javacodegeeks.androidaccelerometerexample.MainActivity;
 
 /**
  * Created by chase on 3/3/15.
@@ -22,13 +16,13 @@ import java.util.LinkedList;
 //}
 
 public class ExampleTest
-        extends ActivityInstrumentationTestCase2<AndroidAccelerometerExample> {
+        extends ActivityInstrumentationTestCase2<MainActivity> {
 
-    private AndroidAccelerometerExample activity;
+    private MainActivity activity;
     private static final int SECONDS_TO_MILLIS = 1000;
 
     public ExampleTest() {
-        super(AndroidAccelerometerExample.class);
+        super(MainActivity.class);
     }
 
     @Override
