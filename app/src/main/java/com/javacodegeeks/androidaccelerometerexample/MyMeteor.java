@@ -115,7 +115,7 @@ public class MyMeteor implements MeteorCallback {
                             Log.d(TAG, "connected, sending data");
                             Map<String, Object> insertValues = new HashMap<String, Object>();
                             // Potentially blocking! Nonzero JSON entries guaranteed.
-                            insertValues.put("accelsJson", activity.accelQueue.accelsToJSON());
+                            insertValues.put("accelsJson", activity.coolDetector.accelQueueMeteor.accelsToJSON());
                             insertValues.put("createdAt", System.currentTimeMillis());
                             Log.d(TAG, "Meteor insert!");
                             mMeteor.insert("batchAccels", insertValues);
@@ -123,7 +123,7 @@ public class MyMeteor implements MeteorCallback {
                             Log.d(TAG, "Meteor insert done!");
                         } else {
                             Log.w(TAG, "Clearing accelsToSend, because meteor is not connected");
-                            activity.accelQueue.accelsToSend.clear();
+                            activity.coolDetector.accelQueueMeteor.accelsToSend.clear();
                         }
                     }
                 }
