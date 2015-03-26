@@ -19,8 +19,8 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.javacodegeeks.androidaccelerometerexample.ble.BleActivityComponent;
-import com.javacodegeeks.androidaccelerometerexample.detector.MovementDetector;
 import com.javacodegeeks.androidaccelerometerexample.detector.Alertable;
+import com.javacodegeeks.androidaccelerometerexample.detector.MovementDetector;
 import com.javacodegeeks.androidaccelerometerexample.push.PushNotifications;
 
 import java.util.Date;

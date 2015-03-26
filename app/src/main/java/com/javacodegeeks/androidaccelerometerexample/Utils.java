@@ -9,6 +9,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Created by chase on 3/23/15.
+ *
  */
 public class Utils {
     private final static String TAG = Utils.class.getSimpleName();

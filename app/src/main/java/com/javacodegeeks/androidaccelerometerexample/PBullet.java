@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * Created by chase on 3/17/15.
+ *
  */
 public class PBullet {
     private final static String TAG = PBullet.class.getSimpleName();
@@ -40,7 +41,7 @@ public class PBullet {
                 pairs.add(new BasicNameValuePair("message", msg));
                 pairs.add(new BasicNameValuePair("title", title));
                 request.setEntity(new UrlEncodedFormEntity(pairs));
-                HttpResponse response = httpClient.execute(request);
+                httpClient.execute(request);
 
                 Log.d(TAG, "SUCCESS request");
                 // handle response here...

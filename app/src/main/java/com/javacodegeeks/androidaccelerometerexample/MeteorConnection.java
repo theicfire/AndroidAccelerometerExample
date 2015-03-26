@@ -12,6 +12,7 @@ import im.delight.android.ddp.MeteorCallback;
 
 /**
  * Created by chase on 3/9/15.
+ *
  */
 public class MeteorConnection implements MeteorCallback {
     private final static String TAG = MeteorConnection.class.getSimpleName();

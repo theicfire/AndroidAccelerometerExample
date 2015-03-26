@@ -7,6 +7,7 @@ import org.json.JSONException;
 
 /**
  * Created by chase on 3/6/15.
+ *
  */
 public class AccelTime {
     private final static String TAG = AccelTime.class.getSimpleName();

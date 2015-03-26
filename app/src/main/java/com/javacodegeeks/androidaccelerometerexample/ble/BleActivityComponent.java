@@ -31,6 +31,7 @@ import java.util.Date;
 
 /**
  * Created by chase on 3/19/15.
+ *
  */
 public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
     public static final String TAG = "BleActivityComponent";

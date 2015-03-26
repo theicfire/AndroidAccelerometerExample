@@ -1,23 +1,20 @@
 package com.javacodegeeks.androidaccelerometerexample.detector;
 
-import android.os.Handler;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.javacodegeeks.androidaccelerometerexample.AccelQueue;
 import com.javacodegeeks.androidaccelerometerexample.AccelTime;
-
-import org.w3c.dom.Text;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by chase on 3/25/15.
+ *
  */
 public class MovementDetector {
     private final static String TAG = MovementDetector.class.getSimpleName();
-    private final float vibrateThreshold = (float) .5;
+    private final float vibrateThreshold;
     private Queue<AccelTime> accelQueueDetector;
     public AccelQueue accelQueueMeteor;
     private Queue<Long> movementTimesQueue;
@@ -32,7 +29,7 @@ public class MovementDetector {
         accelQueueDetector = new ConcurrentLinkedQueue<AccelTime>();
         accelQueueMeteor = new AccelQueue();
         movementTimesQueue = new ConcurrentLinkedQueue<Long>();
-
+        vibrateThreshold = (float) .5;
     }
 
     public void add(AccelTime accelTime) {
