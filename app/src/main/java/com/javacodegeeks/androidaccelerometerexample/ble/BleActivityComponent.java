@@ -19,6 +19,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.javacodegeeks.androidaccelerometerexample.LEDLights;
 import com.javacodegeeks.androidaccelerometerexample.MainActivity;
 import com.javacodegeeks.androidaccelerometerexample.R;
 import com.javacodegeeks.androidaccelerometerexample.Utils;
@@ -211,7 +212,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                         mService.close();
 
 //                        reconnect();
-                        arduinoConnect();
+//                        arduinoConnect();
 
                         //setUiState();
 
@@ -236,6 +237,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
 //                            listAdapter.add("["+currentDateTimeString+"] RX: "+text);
 //                            messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
 
+                            Log.d(TAG, "Received text " + text);
 
                             if ("connected".equals(text)) {
                                 activity.runOnUiThread(new Runnable() {
@@ -252,6 +254,10 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                                         mState = UART_PROFILE_CONNECTED;
                                     }
                                 });
+                            } else if ("loff".equals(text)) {
+                                LEDLights.turnOffCallback();
+                            } else if ("lon".equals(text)) {
+                                LEDLights.turnOnCallback();
                             }
                         } catch (Exception e) {
                             Log.e(TAG, e.toString());

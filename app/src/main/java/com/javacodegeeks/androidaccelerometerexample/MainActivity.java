@@ -135,6 +135,10 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             mBle.arduinoConnect();
         } else if (intentText.equals("bt-off")) {
             mBle.disconnect();
+        } else if (intentText.equals("lon")) {
+            LEDLights.turnOn(mBle.mService);
+        } else if (intentText.equals("loff")) {
+            LEDLights.turnOff(mBle.mService);
         } else {
             ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
