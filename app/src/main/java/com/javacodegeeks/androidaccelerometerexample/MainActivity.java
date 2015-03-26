@@ -153,6 +153,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else {
             gpsMonitor.gpsOff();
             movementDetector.reset();
+            BikeLEDLights.turnOff(mBle.mService);
             excessiveAlertStatusView.setText("Need first bump");
         }
         updateAlertStatusView();
@@ -183,6 +184,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             if (isProduction) {
                 Date date = new Date();
                 ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it's GPS tracked and has a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
+                BikeLEDLights.turnOn(mBle.mService);
                 pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
             } else {
                 v.vibrate(50);
@@ -199,7 +201,8 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             if (isProduction) {
                 mMeteor.alarmTrigger();
                 Date date = new Date();
-                ttobj.speak("I'm watching you.", TextToSpeech.QUEUE_FLUSH, null);
+                BikeSiren.onShort(mBle.mService);
+                ttobj.speak("Please don't take this bike.", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Phone moved LOTS!", "At " + date.toString());
                 SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved LOTS -- " + date.toString(), null, null);
             } else {
