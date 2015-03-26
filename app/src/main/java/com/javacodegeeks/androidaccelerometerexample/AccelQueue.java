@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by chase on 3/9/15.
  */
 public class AccelQueue {
+    private final static String TAG = AccelQueue.class.getSimpleName();
     public LinkedBlockingQueue<AccelTime> accelsToSend;
 
     public AccelQueue() {
@@ -23,7 +24,7 @@ public class AccelQueue {
             // Need to block at the start, if there's no elements to take
             ret.put(accelsToSend.take().toJSON());
         } catch (InterruptedException e) {
-            Log.e("mine", "EEEEKInterrupted Exception!!!");
+            Log.e(TAG, "EEEEKInterrupted Exception!!!");
         }
         while (! accelsToSend.isEmpty()) {
             ret.put(accelsToSend.poll().toJSON());

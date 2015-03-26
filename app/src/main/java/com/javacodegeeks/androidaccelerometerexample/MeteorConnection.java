@@ -13,14 +13,14 @@ import im.delight.android.ddp.MeteorCallback;
 /**
  * Created by chase on 3/9/15.
  */
-public class MyMeteor implements MeteorCallback {
-    static final String TAG = "MyMeteor";
+public class MeteorConnection implements MeteorCallback {
+    private final static String TAG = MeteorConnection.class.getSimpleName();
     public Meteor mMeteor;
     MainActivity activity;
     private boolean reconnecting = false;
     private boolean meteorSenderStarted = false;
 
-    public MyMeteor(MainActivity activity) {
+    public MeteorConnection(MainActivity activity) {
         this.activity = activity;
         mMeteor = new Meteor("ws://biker.chaselambda.com/websocket");
         mMeteor.setCallback(this);
@@ -88,16 +88,6 @@ public class MyMeteor implements MeteorCallback {
     }
 
     public void alarmTrigger() {
-//        Map<String, Object> query= new HashMap<String, Object>();
-//        query.put("_id", "zXHhuCCtXNkXK6EZ");
-//        Map<String, Object> update = new HashMap<String, Object>();
-//        // Potentially blocking! Nonzero JSON entries guaranteed.
-//        update.put("_id", "zXHhuCCtXNkXK6EZ");
-//        update.put("name", "alarmSet");
-//        update.put("value", false);
-//        Log.d(TAG, "Meteor alert!");
-//        mMeteor.update("other", query, update);
-//        Log.d(TAG, "Meteor alert done");
         Utils.postReqTask("http://biker.chaselambda.com/triggerAlarm");
     }
 

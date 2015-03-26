@@ -29,12 +29,12 @@ import java.util.Locale;
 
 public class MainActivity extends Activity implements SensorEventListener, TextToSpeech.OnInitListener, Alertable {
 
-    public static final String TAG = "AndroidAccExample";
+    private final static String TAG = MainActivity.class.getSimpleName();
     private SensorManager sensorManager;
     private Vibrator v;
     private TextToSpeech ttobj;
-    private MyMeteor mMeteor;
-    private LocationMonitor locationMonitor;
+    private MeteorConnection mMeteor;
+    private GpsMonitor gpsMonitor;
     private boolean isProduction = false;
     private PBullet pbullet;
     private PowerManager.WakeLock mWakeLock;
@@ -66,8 +66,8 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         alertStatus = AlertStatus.UNTRIGGERED;
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         ttobj = new TextToSpeech(getApplicationContext(), this);
-        mMeteor = new MyMeteor(this);
-        locationMonitor = new LocationMonitor(this);
+        mMeteor = new MeteorConnection(this);
+        gpsMonitor = new GpsMonitor(this);
         ttobj = new TextToSpeech(getApplicationContext(), this);
         pbullet = new PBullet();
         PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -100,24 +100,24 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 //        setIntent(intent);//must store the new intent unless getIntent() will return the old one
         String intentText = intent.getStringExtra(Intent.EXTRA_TEXT);
         if (intentText == null) {
-            Log.e("mine", "Intent text equals null for some reason");
+            Log.e(TAG, "Intent text equals null for some reason");
             return;
         }
-        Log.d("mine", "Got intent text: " + intentText);
+        Log.d(TAG, "Got intent text: " + intentText);
         if (intentText.equals("gps-off")) {
-            locationMonitor.gpsOff();
-            Log.d("mine", "GPS OFF");
+            gpsMonitor.gpsOff();
+            Log.d(TAG, "GPS OFF");
         } else if (intentText.equals("gps-on")) {
-            locationMonitor.gpsOn();
-            Log.d("mine", "GPS ON");
+            gpsMonitor.gpsOn();
+            Log.d(TAG, "GPS ON");
         } else if (intentText.equals("prod")) {
             isProduction = true;
             Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/prodOn/true");
-            Log.d("mine", "PRODUCTION ON");
+            Log.d(TAG, "PRODUCTION ON");
         } else if (intentText.equals("debug")) {
             isProduction = false;
             Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/prodOn/false");
-            Log.d("mine", "PRODUCTION OFF");
+            Log.d(TAG, "PRODUCTION OFF");
         } else if (intentText.equals("alarm-reset")) {
             setAlertStatus(AlertStatus.UNTRIGGERED);
         } else if (intentText.equals("alarm-trigger")) {
@@ -129,9 +129,9 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else if (intentText.equals("bt-off")) {
             mBle.disconnect();
         } else if (intentText.equals("lon")) {
-            LEDLights.turnOn(mBle.mService);
+            BikeLEDLights.turnOn(mBle.mService);
         } else if (intentText.equals("loff")) {
-            LEDLights.turnOff(mBle.mService);
+            BikeLEDLights.turnOff(mBle.mService);
         } else if (intentText.equals("chain-on")) {
             BikeChain.turnOn(mBle.mService);
         } else {
@@ -143,9 +143,9 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     public void setAlertStatus(AlertStatus a) {
         alertStatus = a;
         if (a != AlertStatus.UNTRIGGERED) {
-            locationMonitor.gpsOn();
+            gpsMonitor.gpsOn();
         } else {
-            locationMonitor.gpsOff();
+            gpsMonitor.gpsOff();
             movementDetector.reset();
             excessiveAlertStatusView.setText("Need first bump");
         }
@@ -277,7 +277,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                             }
                         });
                     } catch (Exception e) {
-                        Log.e("mine", "TODO something bad here, not sure what to do");
+                        Log.e(TAG, "TODO something bad here, not sure what to do");
                     }
                 }
             }

@@ -11,6 +11,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * Created by chase on 3/23/15.
  */
 public class Utils {
+    private final static String TAG = Utils.class.getSimpleName();
+
     public static void postReqTask(String url) {
         new PostTask().execute(url);
     }
@@ -21,7 +23,7 @@ public class Utils {
             HttpPost request = new HttpPost(url);
             httpClient.execute(request);
         }catch (Exception ex) {
-            Log.e("mine", "FAILED request");
+            Log.e(TAG, "FAILED request");
         } finally {
             httpClient.getConnectionManager().shutdown();
         }

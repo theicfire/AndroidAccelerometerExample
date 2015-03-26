@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.javacodegeeks.androidaccelerometerexample.BikeChain;
-import com.javacodegeeks.androidaccelerometerexample.LEDLights;
+import com.javacodegeeks.androidaccelerometerexample.BikeLEDLights;
 import com.javacodegeeks.androidaccelerometerexample.MainActivity;
 import com.javacodegeeks.androidaccelerometerexample.R;
 import com.javacodegeeks.androidaccelerometerexample.Utils;
@@ -254,9 +254,9 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                                     }
                                 });
                             } else if ("lon".equals(text)) {
-                                LEDLights.turnOnCallback();
+                                BikeLEDLights.turnOnCallback();
                             } else if ("loff".equals(text)) {
-                                LEDLights.turnOffCallback();
+                                BikeLEDLights.turnOffCallback();
                             } else if ("chainon".equals(text)) {
                                 BikeChain.turnOnCallback();
                             } else if ("chainoff".equals(text)) {

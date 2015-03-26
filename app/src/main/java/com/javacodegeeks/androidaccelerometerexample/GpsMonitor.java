@@ -11,17 +11,18 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-public class LocationMonitor implements
+public class GpsMonitor implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
-    private final String TAG = "MyAwesomeApp";
+    private final static String TAG = GpsMonitor.class.getSimpleName();
+
 
     public GoogleApiClient mGoogleApiClient;
 
-    public LocationMonitor(Activity activity) {
-        Log.d("mine", "making location monitor");
+    public GpsMonitor(Activity activity) {
+        Log.d(TAG, "making location monitor");
         mGoogleApiClient = new GoogleApiClient.Builder(activity)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
@@ -31,7 +32,7 @@ public class LocationMonitor implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        Log.d("mine", "connected brah");
+        Log.d(TAG, "connected brah");
 
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -53,7 +54,7 @@ public class LocationMonitor implements
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.d("mine", "Location received: " + location.toString());
+        Log.d(TAG, "Location received: " + location.toString());
         Utils.postReqTask("http://chasegps.meteor.com/add_coords/" + location.getLatitude() + "/" + location.getLongitude() + "/" + System.currentTimeMillis());
     }
 

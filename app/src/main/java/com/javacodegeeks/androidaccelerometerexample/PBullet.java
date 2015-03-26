@@ -18,8 +18,8 @@ import java.util.List;
  * Created by chase on 3/17/15.
  */
 public class PBullet {
+    private final static String TAG = PBullet.class.getSimpleName();
 
-    private final String TAG = "PBullet";
     public void send(String title, String msg) {
         new MyAsyncTask().execute(title, msg);
     }
@@ -42,12 +42,11 @@ public class PBullet {
                 request.setEntity(new UrlEncodedFormEntity(pairs));
                 HttpResponse response = httpClient.execute(request);
 
-//                response.getStatusLine().getStatusCode();
-                Log.d("mine", "SUCCESS request");
+                Log.d(TAG, "SUCCESS request");
                 // handle response here...
             }catch (Exception ex) {
                 // handle exception here
-                Log.d("mine", "FAILED request");
+                Log.d(TAG, "FAILED request");
             } finally {
                 httpClient.getConnectionManager().shutdown();
             }

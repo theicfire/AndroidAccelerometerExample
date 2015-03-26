@@ -9,6 +9,8 @@ import org.json.JSONException;
  * Created by chase on 3/6/15.
  */
 public class AccelTime {
+    private final static String TAG = AccelTime.class.getSimpleName();
+
     public float x;
     public float y;
     public float z;
@@ -29,7 +31,7 @@ public class AccelTime {
             ret.put(z);
             ret.put(time);
         } catch (JSONException e) {
-            Log.d("mine", "BAD JSON");
+            Log.d(TAG, "BAD JSON");
         }
         return ret;
     }

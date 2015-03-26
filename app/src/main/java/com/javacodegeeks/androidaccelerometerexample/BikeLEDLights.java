@@ -7,7 +7,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Created by chase on 3/25/15.
  */
-public class LEDLights {
+public class BikeLEDLights {
     public static void turnOn( UartService mService) {
         try {
             mService.writeRXCharacteristic("lon".getBytes("UTF-8"));
