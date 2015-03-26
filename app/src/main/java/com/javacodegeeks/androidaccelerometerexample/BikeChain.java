@@ -15,7 +15,6 @@ public class BikeChain {
 
     public static void turnOn(UartService mService) {
         if (mService != null) {
-
             try {
                 mService.writeRXCharacteristic("chainon".getBytes("UTF-8"));
             } catch (UnsupportedEncodingException e) {
