@@ -59,9 +59,11 @@ public class LocationMonitor implements
 
     public void gpsOn() {
         mGoogleApiClient.connect();
+        Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/gpsOn/true");
     }
     public void gpsOff() {
         mGoogleApiClient.disconnect();
+        Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/gpsOn/false");
     }
 
 }

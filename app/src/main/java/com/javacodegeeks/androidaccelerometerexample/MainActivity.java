@@ -112,9 +112,11 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             Log.d("mine", "GPS ON");
         } else if (intentText.equals("prod")) {
             isProduction = true;
+            Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/prodOn/true");
             Log.d("mine", "PRODUCTION ON");
         } else if (intentText.equals("debug")) {
             isProduction = false;
+            Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/prodOn/false");
             Log.d("mine", "PRODUCTION OFF");
         } else if (intentText.equals("alarm-reset")) {
             setAlertStatus(AlertStatus.UNTRIGGERED);

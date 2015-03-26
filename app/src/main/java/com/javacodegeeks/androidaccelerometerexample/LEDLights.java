@@ -25,10 +25,10 @@ public class LEDLights {
     }
 
     public static void turnOffCallback() {
-        Utils.postReqTask("http://biker.chaselambda.com/lights/off");
+        Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/lightsOn/false");
     }
 
     public static void turnOnCallback() {
-        Utils.postReqTask("http://biker.chaselambda.com/lights/on");
+        Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/lightsOn/true");
     }
 }
