@@ -1,5 +1,7 @@
 package com.javacodegeeks.androidaccelerometerexample;
 
+import android.util.Log;
+
 import com.javacodegeeks.androidaccelerometerexample.ble.UartService;
 
 import java.io.UnsupportedEncodingException;
@@ -9,11 +11,18 @@ import java.io.UnsupportedEncodingException;
  *
  */
 public class BikeChain {
+    private final static String TAG = BikeLEDLights.class.getSimpleName();
+
     public static void turnOn(UartService mService) {
-        try {
-            mService.writeRXCharacteristic("chainon".getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        if (mService != null) {
+
+            try {
+                mService.writeRXCharacteristic("chainon".getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.e(TAG, "Bluetooth not on");
         }
     }
 
