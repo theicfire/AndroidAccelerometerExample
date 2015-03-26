@@ -19,6 +19,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.javacodegeeks.androidaccelerometerexample.BikeChain;
 import com.javacodegeeks.androidaccelerometerexample.LEDLights;
 import com.javacodegeeks.androidaccelerometerexample.MainActivity;
 import com.javacodegeeks.androidaccelerometerexample.R;
@@ -258,6 +259,10 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                                 LEDLights.turnOffCallback();
                             } else if ("lon".equals(text)) {
                                 LEDLights.turnOnCallback();
+                            } else if ("chainon".equals(text)) {
+                                BikeChain.turnOnCallback();
+                            } else if ("chainoff".equals(text)) {
+                                BikeChain.turnOffCallback();
                             }
                         } catch (Exception e) {
                             Log.e(TAG, e.toString());
