@@ -134,6 +134,12 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             BikeLEDLights.turnOff(mBle.mService);
         } else if (intentText.equals("chain-on")) {
             BikeChain.turnOn(mBle.mService);
+        } else if (intentText.equals("siren-short")) {
+            BikeSiren.onShort(mBle.mService);
+        } else if (intentText.equals("siren-medium")) {
+            BikeSiren.onMedium(mBle.mService);
+        } else if (intentText.equals("siren-forever")) {
+            BikeSiren.onForever(mBle.mService);
         } else {
             ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }

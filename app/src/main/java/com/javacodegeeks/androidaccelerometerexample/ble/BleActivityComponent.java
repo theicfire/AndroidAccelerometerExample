@@ -116,8 +116,8 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
     }
 
     public void arduinoConnect() {
-//        String deviceAddress = "D8:8C:7B:9F:AA:5B";
-        String deviceAddress = "C9:72:6F:40:66:D9";
+        String deviceAddress = "D8:8C:7B:9F:AA:5B";
+//        String deviceAddress = "C9:72:6F:40:66:D9";
         mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress);
 
         ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - connecting");
