@@ -176,7 +176,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             Log.d(TAG, "Sending mini alert.");
             if (isProduction) {
                 Date date = new Date();
-                ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it is equipped with tracking equipment, internet connectivity, and a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
+                ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it's GPS tracked and has a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
             } else {
                 v.vibrate(50);
