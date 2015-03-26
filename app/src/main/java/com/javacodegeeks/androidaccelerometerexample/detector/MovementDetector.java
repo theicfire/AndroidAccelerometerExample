@@ -7,6 +7,8 @@ import android.widget.TextView;
 import com.javacodegeeks.androidaccelerometerexample.AccelQueue;
 import com.javacodegeeks.androidaccelerometerexample.AccelTime;
 
+import org.w3c.dom.Text;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -20,17 +22,13 @@ public class MovementDetector {
     public AccelQueue accelQueueMeteor;
     private Queue<Long> movementTimesQueue;
     private Alertable alert;
-    private Handler mHandler;
+
     private static final int MAX_NOTIFY_DELTA = 12 * 1000;
     private static final int MIN_NOTIFY_DELTA = 5 * 1000;
-    private TextView excessiveAlertStatus;
-    private boolean excessiveAlertTriggered;
 
-    public MovementDetector(Alertable alert, TextView excessiveAlertStatus) {
+
+    public MovementDetector(Alertable alert) {
         this.alert = alert;
-        this.excessiveAlertStatus = excessiveAlertStatus;
-        excessiveAlertTriggered = false;
-        startTimeRangeViewUpdate();
         accelQueueDetector = new ConcurrentLinkedQueue<AccelTime>();
         accelQueueMeteor = new AccelQueue();
         movementTimesQueue = new ConcurrentLinkedQueue<Long>();
@@ -38,13 +36,12 @@ public class MovementDetector {
     }
 
     public void add(AccelTime accelTime) {
-        if (!excessiveAlertTriggered && maxAccelDifference(accelTime) > vibrateThreshold) {
+        if (Alertable.AlertStatus.MINI.compareTo(alert.getAlertStatus()) >= 0 &&
+                maxAccelDifference(accelTime) > vibrateThreshold) {
             Log.d(TAG, "Diff is great enough!");
             alert.sendMiniAlert();
             if (timeLeftToAlertIfAdded(System.currentTimeMillis()) > 0) {
                 alert.sendExcessiveAlert();
-                excessiveAlertStatus.setText("Triggered!");
-                excessiveAlertTriggered = true;
             }
             movementTimesQueue.add(System.currentTimeMillis());
             accelQueueDetector.clear();
@@ -60,8 +57,6 @@ public class MovementDetector {
     public void reset() {
         accelQueueDetector.clear();
         movementTimesQueue.clear();
-        excessiveAlertStatus.setText("Need first bump");
-        excessiveAlertTriggered = false;
     }
 
     public long timeLeftToAlertIfAdded(long millis) {
@@ -82,37 +77,7 @@ public class MovementDetector {
         return ret;
     }
 
-    private void startTimeRangeViewUpdate() {
-        mHandler = new Handler();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(1000);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!excessiveAlertTriggered) {
-                                    long timeLeftToAlert = timeLeftToAlertIfAdded(System.currentTimeMillis());
-                                    if (timeLeftToAlert > 0) {
-                                        excessiveAlertStatus.setText("Second bump trigger until " + timeLeftToAlert);
-                                    } else if (timeLeftToAlert == -999) {
-                                        excessiveAlertStatus.setText("Need first bump");
-                                        alert.unsetMiniAlert();
-                                    } else {
-                                        excessiveAlertStatus.setText("Require second bump in " + timeLeftToAlert);
-                                    }
-                                }
-                            }
-                        });
-                    } catch (Exception e) {
-                        Log.e("mine", "TODO something bad here, not sure what to do");
-                    }
-                }
-            }
-        }).start();
-    }
+
 
     private float maxAccelDifference(AccelTime current) {
         float ret = 0;

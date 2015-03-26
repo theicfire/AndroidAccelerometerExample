@@ -9,6 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
@@ -38,10 +39,12 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     private PBullet pbullet;
     private PowerManager.WakeLock mWakeLock;
     private BleActivityComponent mBle;
-    public boolean alarmTriggered = false;
     public MovementDetector movementDetector;
-    private TextView countView, notifyTimeRangeView;
+    private TextView countView, alertStatusView;
     private int count;
+    private AlertStatus alertStatus;
+    private TextView excessiveAlertStatusView;
+    private Handler mHandler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,49 +55,37 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         }
 
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
-        registerListener();
-        (new PushNotifications(getApplicationContext(), this)).runRegisterInBackground();
-        v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
+        (new PushNotifications(getApplicationContext(), this)).runRegisterInBackground();
+
+        count = 0;
+        alertStatus = AlertStatus.UNTRIGGERED;
+        v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         ttobj = new TextToSpeech(getApplicationContext(), this);
         mMeteor = new MyMeteor(this);
         locationMonitor = new LocationMonitor(this);
         ttobj = new TextToSpeech(getApplicationContext(), this);
         pbullet = new PBullet();
-        PowerManager manager =
-                (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         // Needed to have accelerometer readings stay up to date, and not delay when the screen is off.
         mWakeLock.acquire();
         mBle = new BleActivityComponent(this);
-        initializeViews();
-        movementDetector = new MovementDetector(this, (TextView) findViewById(R.id.excessiveAlertStatus));
-        count = 0;
-    }
-
-    private void registerListener() {
-        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    private void updateNotifyTimeRangeView() {
-        if (alarmTriggered) {
-            notifyTimeRangeView.setText("Alarm triggered!");
-        } else {
-            notifyTimeRangeView.setText("Waiting for bump");
-        }
-    }
-
-    private void initializeViews() {
         countView = (TextView) findViewById(R.id.count);
-        notifyTimeRangeView = (TextView) findViewById(R.id.triggerStatus);
+        alertStatusView = (TextView) findViewById(R.id.alertStatus);
+        excessiveAlertStatusView = (TextView) findViewById(R.id.excessiveAlertStatus);
+        movementDetector = new MovementDetector(this);
+        startExcessiveAlertStatusUpdate();
+        Utils.postReqTask("http://biker.chaselambda.com/phonestart");
     }
 
-    private void unregisterListener() {
-        sensorManager.unregisterListener(this);
+    @Override
+    public AlertStatus getAlertStatus() {
+        return alertStatus;
     }
 
     @Override
@@ -126,9 +117,9 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             isProduction = false;
             Log.d("mine", "PRODUCTION OFF");
         } else if (intentText.equals("alarm-reset")) {
-            setAlarmTriggered(false);
+            setAlertStatus(AlertStatus.UNTRIGGERED);
         } else if (intentText.equals("alarm-trigger")) {
-            setAlarmTriggered(true);
+            setAlertStatus(AlertStatus.MINI);
             sendExcessiveAlert();
             ttobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
         } else if (intentText.equals("bt-on")) {
@@ -147,15 +138,16 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         Utils.postReqTask("http://biker.chaselambda.com/tts-received");
     }
 
-    public void setAlarmTriggered(boolean t) {
-        alarmTriggered = t;
-        if (t) {
+    public void setAlertStatus(AlertStatus a) {
+        alertStatus = a;
+        if (a != AlertStatus.UNTRIGGERED) {
             locationMonitor.gpsOn();
         } else {
             locationMonitor.gpsOff();
             movementDetector.reset();
+            excessiveAlertStatusView.setText("Need first bump");
         }
-        updateNotifyTimeRangeView();
+        updateAlertStatusView();
     }
 
     @Override
@@ -171,10 +163,15 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     }
 
     @Override
+    public void unsetMiniAlert() {
+        setAlertStatus(AlertStatus.UNTRIGGERED);
+    }
+
+    @Override
     public void sendMiniAlert() {
-        if (!alarmTriggered) {
-            setAlarmTriggered(true);
-            Log.d("mine", "Sending mini alert.");
+        if (alertStatus == AlertStatus.UNTRIGGERED) {
+            setAlertStatus(AlertStatus.MINI);
+            Log.d(TAG, "Sending mini alert.");
             if (isProduction) {
                 Date date = new Date();
                 ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it is equipped with tracking equipment, internet connectivity, and a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
@@ -186,26 +183,39 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     }
 
     @Override
-    public void unsetMiniAlert() {
-        setAlarmTriggered(false);
-
-    }
-
-    @Override
     public void sendExcessiveAlert() {
-        Log.d("mine", "Excessive notify.");
-        Date date = new Date();
-        mMeteor.alarmTrigger();
-        if (isProduction) {
-//                    ttobj.speak("Welcome to the lock free bike. If you would like this moved, please call the number located on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
-            pbullet.send("Phone moved LOTS!", "At " + date.toString());
-            SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved LOTS -- " + date.toString(), null, null);
-//            Toast.makeText(getApplicationContext(), "Sending SMS!", Toast.LENGTH_SHORT).show();
-        } else {
-            v.vibrate(500);
+        if (AlertStatus.MINI.compareTo(alertStatus) >= 0) {
+            excessiveAlertStatusView.setText("Triggered!");
+            setAlertStatus(AlertStatus.EXCESSIVE);
+            Log.d(TAG, "sendExcessiveAlert.");
+            if (isProduction) {
+                mMeteor.alarmTrigger();
+                Date date = new Date();
+                ttobj.speak("I'm watching you.", TextToSpeech.QUEUE_FLUSH, null);
+                pbullet.send("Phone moved LOTS!", "At " + date.toString());
+                SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved LOTS -- " + date.toString(), null, null);
+            } else {
+                v.vibrate(500);
+            }
         }
     }
 
+    public void sendChainAlert() {
+        if (AlertStatus.EXCESSIVE.compareTo(alertStatus) >= 0) {
+            excessiveAlertStatusView.setText("Chain Cut!");
+            setAlertStatus(AlertStatus.CHAIN_CUT);
+            Log.d(TAG, "sendChainAlert.");
+            if (isProduction) {
+                mMeteor.alarmTrigger();
+                Date date = new Date();
+                ttobj.speak("Chain cut.", TextToSpeech.QUEUE_FLUSH, null);
+                pbullet.send("Chain cut!", "At " + date.toString());
+                SmsManager.getDefault().sendTextMessage("+15125778778", null, "Chain cut! -- " + date.toString(), null, null);
+            } else {
+                v.vibrate(500);
+            }
+        }
+    }
 
     @Override
     public void onDestroy() {
@@ -213,8 +223,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         Log.d(TAG, "DESTROY!");
         mWakeLock.release();
         mMeteor.mMeteor.disconnect();
-        unregisterListener();
-
+        sensorManager.unregisterListener(this);
         try {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mBle.UARTStatusChangeReceiver);
         } catch (Exception ignore) {
@@ -235,10 +244,58 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             this.startActivityForResult(enableIntent, BleActivityComponent.REQUEST_ENABLE_BT);
         }
-
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         mBle.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void startExcessiveAlertStatusUpdate() {
+        mHandler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(1000);
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (Alertable.AlertStatus.MINI.compareTo(alertStatus) >= 0) {
+                                    long timeLeftToAlert = movementDetector.timeLeftToAlertIfAdded(System.currentTimeMillis());
+                                    if (timeLeftToAlert > 0) {
+                                        excessiveAlertStatusView.setText("Second bump trigger until " + timeLeftToAlert);
+                                    } else if (timeLeftToAlert == -999) {
+                                        excessiveAlertStatusView.setText("Need first bump");
+                                        unsetMiniAlert();
+                                    } else {
+                                        excessiveAlertStatusView.setText("Require second bump in " + timeLeftToAlert);
+                                    }
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        Log.e("mine", "TODO something bad here, not sure what to do");
+                    }
+                }
+            }
+        }).start();
+    }
+
+    private void updateAlertStatusView() {
+        switch (alertStatus) {
+            case UNTRIGGERED:
+                alertStatusView.setText("Untriggered");
+                break;
+            case MINI:
+                alertStatusView.setText("Small amount of movement");
+                break;
+            case EXCESSIVE:
+                alertStatusView.setText("Excessive movement");
+                break;
+            case CHAIN_CUT:
+                alertStatusView.setText("Chain cut!");
+                break;
+        }
     }
 }

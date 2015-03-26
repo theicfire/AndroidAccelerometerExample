@@ -2,6 +2,8 @@ package com.javacodegeeks.androidaccelerometerexample;
 
 import android.util.Log;
 
+import com.javacodegeeks.androidaccelerometerexample.detector.Alertable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -110,7 +112,7 @@ public class MyMeteor implements MeteorCallback {
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
-                    if (activity.alarmTriggered) {
+                    if (activity.getAlertStatus() != Alertable.AlertStatus.UNTRIGGERED) {
                         if (mMeteor.isConnected()) {
                             Log.d(TAG, "connected, sending data");
                             Map<String, Object> insertValues = new HashMap<String, Object>();

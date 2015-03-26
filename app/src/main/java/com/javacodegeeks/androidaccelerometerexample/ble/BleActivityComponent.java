@@ -71,8 +71,6 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
         edtMessage = (EditText) activity.findViewById(R.id.sendText);
         service_init();
 
-
-
         // Handler Disconnect & Connect button
         btnConnectDisconnect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,7 +162,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
             public void run() {
                 // TODO I'd love to have some callback on the attempted reconnect to know if the reconnect failed or not.
                 // But UartService doesn't seem to tell us when the reconnect attempt failed...
-                if (mState == UART_PROFILE_DISCONNECTED && activity.alarmTriggered) {
+                if (mState == UART_PROFILE_DISCONNECTED) {
                     try {
                         Thread.sleep(4000);
                     } catch (InterruptedException ex) {
@@ -255,13 +253,14 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                                         mState = UART_PROFILE_CONNECTED;
                                     }
                                 });
-                            } else if ("loff".equals(text)) {
-                                LEDLights.turnOffCallback();
                             } else if ("lon".equals(text)) {
                                 LEDLights.turnOnCallback();
+                            } else if ("loff".equals(text)) {
+                                LEDLights.turnOffCallback();
                             } else if ("chainon".equals(text)) {
                                 BikeChain.turnOnCallback();
                             } else if ("chainoff".equals(text)) {
+                                activity.sendChainAlert();
                                 BikeChain.turnOffCallback();
                             }
                         } catch (Exception e) {
@@ -275,8 +274,6 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                 showMessage("Device doesn't support UART. Disconnecting");
                 mService.disconnect();
             }
-
-
         }
     };
 
