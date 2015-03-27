@@ -21,11 +21,17 @@ public class AccelQueue {
     public String accelsToJSON() {
         JSONArray ret = new JSONArray();
         try {
-            // Need to block at the start, if there's no elements to take
+            // Block at the start, if there's no elements to take
             ret.put(accelsToSend.take().toJSON());
         } catch (InterruptedException e) {
             Log.e(TAG, "EEEEKInterrupted Exception!!!");
         }
+        // Want to send a maximum of 300 data pieces. The number is arbitrary, but 300 samples
+        // at even a fast accelerometer rate is still a few seconds worth of data.
+        while (accelsToSend.size() > 300) {
+            accelsToSend.poll();
+        }
+        Log.d(TAG, "Size to actually send " + accelsToSend.size());
         while (! accelsToSend.isEmpty()) {
             ret.put(accelsToSend.poll().toJSON());
         }
