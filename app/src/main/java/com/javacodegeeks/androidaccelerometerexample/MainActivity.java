@@ -272,7 +272,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                if (Alertable.AlertStatus.MINI.compareTo(alertStatus) >= 0) {
+                                if (Alertable.AlertStatus.MINI == alertStatus) {
                                     long timeLeftToAlert = movementDetector.timeLeftToAlertIfAdded(System.currentTimeMillis());
                                     if (timeLeftToAlert > 0) {
                                         excessiveAlertStatusView.setText("Second bump trigger until " + timeLeftToAlert);
