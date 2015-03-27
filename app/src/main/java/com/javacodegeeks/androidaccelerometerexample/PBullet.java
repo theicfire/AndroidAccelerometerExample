@@ -21,35 +21,26 @@ import java.util.List;
 public class PBullet {
     private final static String TAG = PBullet.class.getSimpleName();
 
-    public void send(String title, String msg) {
-        new MyAsyncTask().execute(title, msg);
-    }
-
-    public class MyAsyncTask extends AsyncTask<String, Integer, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            postData(params[0], params[1]);
-            return null;
-        }
-
-        public void postData(String title, String msg) {
-            HttpClient httpClient = new DefaultHttpClient();
-            try {
-                HttpPost request = new HttpPost("http://biker.chaselambda.com/pbullet/" + title + "/" + msg);
-                List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-                request.setEntity(new UrlEncodedFormEntity(pairs));
-                httpClient.execute(request);
-
-                Log.d(TAG, "SUCCESS request");
-                // handle response here...
-            }catch (Exception ex) {
-                // handle exception here
-                Log.d(TAG, "FAILED request");
-            } finally {
-                httpClient.getConnectionManager().shutdown();
+    public void send(final String title, final String msg) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpClient httpClient = new DefaultHttpClient();
+                try {
+                    Log.d(TAG, "SENDING pbullet request");
+                    HttpPost request = new HttpPost("http://biker.chaselambda.com/pbullet");
+                    List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+                    pairs.add(new BasicNameValuePair("msg", msg));
+                    pairs.add(new BasicNameValuePair("title", title));
+                    request.setEntity(new UrlEncodedFormEntity(pairs));
+                    httpClient.execute(request);
+                }catch (Exception ex) {
+                    Log.e(TAG, "FAILED request");
+                } finally {
+                    httpClient.getConnectionManager().shutdown();
+                }
             }
-        }
+        }).start();
     }
 }
 

@@ -22,6 +22,7 @@ public class Utils {
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
                 try {
+                    Log.d(TAG, "SENDING request " + url);
                     HttpPost request = new HttpPost(url);
                     httpClient.execute(request);
                 }catch (Exception ex) {
