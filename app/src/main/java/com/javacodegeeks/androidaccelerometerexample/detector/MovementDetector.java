@@ -20,9 +20,8 @@ public class MovementDetector {
     private Queue<Long> movementTimesQueue;
     private Alertable alert;
 
-    private static final int MAX_NOTIFY_DELTA = 12 * 1000;
-    private static final int MIN_NOTIFY_DELTA = 5 * 1000;
-
+    private static final int MAX_NOTIFY_DELTA = 25 * 1000;
+    private static final int MIN_NOTIFY_DELTA = 10 * 1000;
 
     public MovementDetector(Alertable alert) {
         this.alert = alert;

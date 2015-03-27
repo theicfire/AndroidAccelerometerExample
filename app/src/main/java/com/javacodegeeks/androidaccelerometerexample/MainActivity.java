@@ -183,7 +183,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             Log.d(TAG, "Sending mini alert.");
             if (isProduction) {
                 Date date = new Date();
-                ttobj.speak("Welcome to the rocket bike. It doesn't need a thick lock because it's GPS tracked and has a horrendously loud siren.", TextToSpeech.QUEUE_FLUSH, null);
+                ttobj.speak("Welcome to the smart bike. If you'd like this moved, please call the number on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
                 BikeLEDLights.turnOn(mBle.mService);
                 pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
             } else {
@@ -202,7 +202,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                 mMeteor.alarmTrigger();
                 Date date = new Date();
                 BikeSiren.onShort(mBle.mService);
-                ttobj.speak("Please don't take this bike.", TextToSpeech.QUEUE_FLUSH, null);
+                ttobj.speak("This doesn't need a thick lock because it's GPS tracked and constantly monitored", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Phone moved LOTS!", "At " + date.toString());
                 SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved LOTS -- " + date.toString(), null, null);
             } else {
@@ -219,7 +219,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             if (isProduction) {
                 mMeteor.alarmTrigger();
                 Date date = new Date();
-                ttobj.speak("Chain cut.", TextToSpeech.QUEUE_FLUSH, null);
+                ttobj.speak("The lock has been cut. Palo Alto authorities notified.", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Chain cut!", "At " + date.toString());
                 SmsManager.getDefault().sendTextMessage("+15125778778", null, "Chain cut! -- " + date.toString(), null, null);
             } else {
