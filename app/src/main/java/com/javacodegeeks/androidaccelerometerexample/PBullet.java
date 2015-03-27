@@ -36,10 +36,8 @@ public class PBullet {
         public void postData(String title, String msg) {
             HttpClient httpClient = new DefaultHttpClient();
             try {
-                HttpPost request = new HttpPost("http://pbullet.chaselambda.com/send");
+                HttpPost request = new HttpPost("http://biker.chaselambda.com/pbullet/" + title + "/" + msg);
                 List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-                pairs.add(new BasicNameValuePair("message", msg));
-                pairs.add(new BasicNameValuePair("title", title));
                 request.setEntity(new UrlEncodedFormEntity(pairs));
                 httpClient.execute(request);
 
