@@ -80,7 +80,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         excessiveAlertStatusView = (TextView) findViewById(R.id.excessiveAlertStatus);
         movementDetector = new MovementDetector(this);
         startExcessiveAlertStatusUpdate();
-        Utils.postReqTask("http://biker.chaselambda.com/phonestart");
+        Utils.postReqThread("http://biker.chaselambda.com/phonestart");
     }
 
     @Override
@@ -112,11 +112,11 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             Log.d(TAG, "GPS ON");
         } else if (intentText.equals("prod")) {
             isProduction = true;
-            Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/prodOn/true");
+            Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/prodOn/true");
             Log.d(TAG, "PRODUCTION ON");
         } else if (intentText.equals("debug")) {
             isProduction = false;
-            Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/prodOn/false");
+            Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/prodOn/false");
             Log.d(TAG, "PRODUCTION OFF");
         } else if (intentText.equals("alarm-reset")) {
             setAlertStatus(AlertStatus.UNTRIGGERED);
@@ -143,7 +143,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else {
             ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
-        Utils.postReqTask("http://biker.chaselambda.com/tts-received");
+        Utils.postReqThread("http://biker.chaselambda.com/tts-received");
     }
 
     public void setAlertStatus(AlertStatus a) {

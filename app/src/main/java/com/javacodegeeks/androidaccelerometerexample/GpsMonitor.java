@@ -55,16 +55,16 @@ public class GpsMonitor implements
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "Location received: " + location.toString());
-        Utils.postReqTask("http://chasegps.meteor.com/add_coords/" + location.getLatitude() + "/" + location.getLongitude() + "/" + System.currentTimeMillis());
+        Utils.postReqThread("http://chasegps.meteor.com/add_coords/" + location.getLatitude() + "/" + location.getLongitude() + "/" + System.currentTimeMillis());
     }
 
     public void gpsOn() {
         mGoogleApiClient.connect();
-        Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/gpsOn/true");
+        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/gpsOn/true");
     }
     public void gpsOff() {
         mGoogleApiClient.disconnect();
-        Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/gpsOn/false");
+        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/gpsOn/false");
     }
 
 }

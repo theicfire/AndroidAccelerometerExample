@@ -3,6 +3,8 @@ package com.javacodegeeks.androidaccelerometerexample;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.javacodegeeks.androidaccelerometerexample.detector.Alertable;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -14,8 +16,21 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class Utils {
     private final static String TAG = Utils.class.getSimpleName();
 
-    public static void postReqTask(String url) {
-        new PostTask().execute(url);
+    public static void postReqThread(final String url) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpClient httpClient = new DefaultHttpClient();
+                try {
+                    HttpPost request = new HttpPost(url);
+                    httpClient.execute(request);
+                }catch (Exception ex) {
+                    Log.e(TAG, "FAILED request");
+                } finally {
+                    httpClient.getConnectionManager().shutdown();
+                }
+            }
+        }).start();
     }
 
     public static void postReq(String url) {
@@ -27,18 +42,6 @@ public class Utils {
             Log.e(TAG, "FAILED request");
         } finally {
             httpClient.getConnectionManager().shutdown();
-        }
-    }
-
-    public static class PostTask extends AsyncTask<String, Integer, String> {
-        @Override
-        protected String doInBackground(String... params) {
-            postData(params[0]);
-            return null;
-        }
-
-        public void postData(String url) {
-            postReq(url);
         }
     }
 }

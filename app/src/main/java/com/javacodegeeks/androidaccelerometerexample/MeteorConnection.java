@@ -89,7 +89,7 @@ public class MeteorConnection implements MeteorCallback {
     }
 
     public void alarmTrigger() {
-        Utils.postReqTask("http://biker.chaselambda.com/triggerAlarm");
+        Utils.postReqThread("http://biker.chaselambda.com/triggerAlarm");
     }
 
     public void meteorSender() {
@@ -108,6 +108,7 @@ public class MeteorConnection implements MeteorCallback {
                             Log.d(TAG, "connected, sending data");
                             Map<String, Object> insertValues = new HashMap<String, Object>();
                             // Potentially blocking! Nonzero JSON entries guaranteed.
+                            Log.d(TAG, "Size to send is " + activity.movementDetector.accelQueueMeteor.accelsToSend.size());
                             insertValues.put("accelsJson", activity.movementDetector.accelQueueMeteor.accelsToJSON());
                             insertValues.put("createdAt", System.currentTimeMillis());
                             Log.d(TAG, "Meteor insert!");

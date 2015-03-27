@@ -26,11 +26,11 @@ public class BikeChain {
     }
 
     public static void turnOnCallback() {
-        Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/chainOn/true");
+        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/chainOn/true");
     }
 
     public static void turnOffCallback() {
-        Utils.postReqTask("http://biker.chaselambda.com/setGlobalState/chainOn/false");
+        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/chainOn/false");
     }
 
 }
