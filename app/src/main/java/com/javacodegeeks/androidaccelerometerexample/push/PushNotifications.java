@@ -45,7 +45,7 @@ public class PushNotifications {
      * Substitute you own sender ID here. This is the project number you got
      * from the API Console, as described in "Getting Started."
      */
-    String SENDER_ID = "98282822126";
+    String SENDER_ID = "889334644472";
 
     /**
      * Tag used on log messages.
