@@ -23,7 +23,7 @@ public class MeteorConnection implements MeteorCallback {
 
     public MeteorConnection(MainActivity activity) {
         this.activity = activity;
-        mMeteor = new Meteor("ws://biker.chaselambda.com/websocket");
+        mMeteor = new Meteor(Utils.METEOR_URL_WS);
         mMeteor.setCallback(this);
     }
 
@@ -89,7 +89,7 @@ public class MeteorConnection implements MeteorCallback {
     }
 
     public void alarmTrigger() {
-        Utils.postReqThread("http://biker.chaselambda.com/triggerAlarm");
+        Utils.postReqThread(Utils.METEOR_URL + "/triggerAlarm");
     }
 
     public void meteorSender() {

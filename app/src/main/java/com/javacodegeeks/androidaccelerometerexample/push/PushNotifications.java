@@ -220,6 +220,6 @@ public class PushNotifications {
      * to a server that echoes back the message using the 'from' address in the message.
      */
     private void sendRegistrationIdToBackend() {
-        Utils.postReq("http://biker.chaselambda.com/regid/" + regid);
+        Utils.postReq(Utils.METEOR_URL + "/regid/" + regid);
     }
 }

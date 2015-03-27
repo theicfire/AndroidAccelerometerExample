@@ -18,6 +18,7 @@ public class AccelQueue {
         accelsToSend = new LinkedBlockingQueue<AccelTime>();
     }
 
+    // This is blocking
     public String accelsToJSON() {
         JSONArray ret = new JSONArray();
         try {

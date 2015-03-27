@@ -28,7 +28,7 @@ public class PBullet {
                 HttpClient httpClient = new DefaultHttpClient();
                 try {
                     Log.d(TAG, "SENDING pbullet request");
-                    HttpPost request = new HttpPost("http://biker.chaselambda.com/pbullet");
+                    HttpPost request = new HttpPost(Utils.METEOR_URL + "/pbullet");
                     List<NameValuePair> pairs = new ArrayList<NameValuePair>();
                     pairs.add(new BasicNameValuePair("msg", msg));
                     pairs.add(new BasicNameValuePair("title", title));

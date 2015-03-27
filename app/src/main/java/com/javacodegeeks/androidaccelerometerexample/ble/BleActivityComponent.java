@@ -117,6 +117,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
 
     public void arduinoConnect() {
 //        String deviceAddress = "D8:8C:7B:9F:AA:5B";
+
         String deviceAddress = "C9:72:6F:40:66:D9";
         mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress);
 
@@ -207,7 +208,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                         edtMessage.setEnabled(false);
                         btnSend.setEnabled(false);
                         ((TextView) activity.findViewById(R.id.deviceName)).setText("Not Connected");
-                        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/bluetoothOn/false");
+                        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/bluetoothOn/false");
 //                        listAdapter.add("["+currentDateTimeString+"] Disconnected to: "+ mDevice.getName());
                         mState = UART_PROFILE_DISCONNECTED;
                         mService.close();
@@ -249,7 +250,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                                         edtMessage.setEnabled(true);
                                         btnSend.setEnabled(true);
                                         ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
-                                        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/bluetoothOn/true");
+                                        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/bluetoothOn/true");
 //                        listAdapter.add("["+currentDateTimeString+"] Connected to: "+ mDevice.getName());
 //                        messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
                                         mState = UART_PROFILE_CONNECTED;

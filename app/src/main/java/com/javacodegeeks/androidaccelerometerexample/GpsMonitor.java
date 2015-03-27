@@ -60,11 +60,11 @@ public class GpsMonitor implements
 
     public void gpsOn() {
         mGoogleApiClient.connect();
-        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/gpsOn/true");
+        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/gpsOn/true");
     }
     public void gpsOff() {
         mGoogleApiClient.disconnect();
-        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/gpsOn/false");
+        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/gpsOn/false");
     }
 
 }

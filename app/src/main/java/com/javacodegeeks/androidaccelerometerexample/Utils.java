@@ -15,6 +15,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
  */
 public class Utils {
     private final static String TAG = Utils.class.getSimpleName();
+    public final static String METEOR_URL = "http://biker.chaselambda.com";
+    public final static String METEOR_URL_WS = "ws://biker.chaselambda.com/websocket";
 
     public static void postReqThread(final String url) {
         new Thread(new Runnable() {

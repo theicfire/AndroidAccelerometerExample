@@ -38,10 +38,10 @@ public class BikeLEDLights {
     }
 
     public static void turnOffCallback() {
-        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/lightsOn/false");
+        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/lightsOn/false");
     }
 
     public static void turnOnCallback() {
-        Utils.postReqThread("http://biker.chaselambda.com/setGlobalState/lightsOn/true");
+        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/lightsOn/true");
     }
 }
