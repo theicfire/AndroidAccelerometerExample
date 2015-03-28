@@ -3,13 +3,16 @@ package com.javacodegeeks.androidaccelerometerexample.ble;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
@@ -54,6 +57,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
     private Button btnConnectDisconnect,btnSend;
     private EditText edtMessage;
     public final MainActivity activity;
+    private BluetoothAdapter mBluetoothAdapter;
 
     public BleActivityComponent(MainActivity act) {
         this.activity = act;
@@ -63,6 +67,17 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
             activity.finish();
             return;
         }
+
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        // Checks if Bluetooth is supported on the device.
+        if (mBluetoothAdapter == null) {
+            Log.d(TAG, "BLE not supported");
+            return;
+        }
+
 //        messageListView = (ListView) findViewById(R.id.listMessage);
 //        listAdapter = new ArrayAdapter<String>(this, R.layout.message_detail);
 //        messageListView.setAdapter(listAdapter);
@@ -116,15 +131,68 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
     }
 
     public void arduinoConnect() {
-//        String deviceAddress = "D8:8C:7B:9F:AA:5B";
-
-        String deviceAddress = "C9:72:6F:40:66:D9";
+        String deviceAddress = "D8:8C:7B:9F:AA:5B";
         mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress);
 
-        ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - connecting");
-
-        mService.connect(deviceAddress);
+        if (mDevice.getName() == null) {
+            scanLeDevice(true, deviceAddress);
+        } else {
+            ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - connecting");
+            mService.connect(deviceAddress);
+        }
     }
+
+    private void scanLeDevice(final boolean enable, final String deviceAddress) {
+        final Button cancelButton = (Button) activity.findViewById(R.id.btn_cancel);
+        if (enable) {
+            // Stops scanning after a pre-defined scan period.
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+
+                    mService.connect(deviceAddress);
+
+                }
+            }, 5000);
+
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+        } else {
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        }
+
+    }
+
+
+    private Handler mHandler = new Handler() {
+        @Override
+
+        //Handler events that received from UART service
+        public void handleMessage(Message msg) {
+
+        }
+    };
+
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+
+                @Override
+                public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//
+//                            runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    addDevice(device,rssi);
+//                                }
+//                            });
+//
+//                        }
+//                    });
+                }
+            };
 
     public void disconnect() {
         if (mDevice!=null) {
@@ -196,6 +264,21 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                 // there can be a significant delay between when this is hit and when the message from the arduino
                 // is received.
                 Log.d(TAG, "Almost connected");
+
+                activity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
+                        Log.d(TAG, "UART_CONNECT_MSG");
+                        btnConnectDisconnect.setText("Disconnect");
+                        edtMessage.setEnabled(true);
+                        btnSend.setEnabled(true);
+                        ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
+                        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/bluetoothOn/true");
+//                        listAdapter.add("["+currentDateTimeString+"] Connected to: "+ mDevice.getName());
+//                        messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                        mState = UART_PROFILE_CONNECTED;
+                    }
+                });
             }
 
             //*********************//
@@ -242,20 +325,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
                             Log.d(TAG, "Received text " + text);
 
                             if ("connected".equals(text)) {
-                                activity.runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-                                        Log.d(TAG, "UART_CONNECT_MSG");
-                                        btnConnectDisconnect.setText("Disconnect");
-                                        edtMessage.setEnabled(true);
-                                        btnSend.setEnabled(true);
-                                        ((TextView) activity.findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
-                                        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/bluetoothOn/true");
-//                        listAdapter.add("["+currentDateTimeString+"] Connected to: "+ mDevice.getName());
-//                        messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
-                                        mState = UART_PROFILE_CONNECTED;
-                                    }
-                                });
+
                             } else if ("lon".equals(text)) {
                                 BikeLEDLights.turnOnCallback();
                             } else if ("loff".equals(text)) {
