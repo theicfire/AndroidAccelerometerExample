@@ -15,8 +15,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
  */
 public class Utils {
     private final static String TAG = Utils.class.getSimpleName();
-    public final static String METEOR_URL = "http://biker.chaselambda.com";
-    public final static String METEOR_URL_WS = "ws://biker.chaselambda.com/websocket";
+//    public final static String METEOR_URL = "http://oli.chaselambda.com"; // IP address of DO server
+//    public final static String METEOR_URL_WS = "ws://oli.chaselambda.com/websocket";
+
+    public final static String METEOR_URL = "http://10.1.10.37:3000";
+    public final static String METEOR_URL_WS = "ws://10.1.10.37:3000/websocket";
 
     public static void postReqThread(final String url) {
         new Thread(new Runnable() {

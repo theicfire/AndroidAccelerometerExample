@@ -32,7 +32,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     private final static String TAG = MainActivity.class.getSimpleName();
     private SensorManager sensorManager;
     private Vibrator v;
-    private TextToSpeech ttobj;
+    private TextToSpeech ttsobj;
     private MeteorConnection mMeteor;
     private GpsMonitor gpsMonitor;
     private boolean isProduction = false;
@@ -65,10 +65,10 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         count = 0;
         alertStatus = AlertStatus.UNTRIGGERED;
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        ttobj = new TextToSpeech(getApplicationContext(), this);
+        ttsobj = new TextToSpeech(getApplicationContext(), this);
         mMeteor = new MeteorConnection(this);
         gpsMonitor = new GpsMonitor(this);
-        ttobj = new TextToSpeech(getApplicationContext(), this);
+        ttsobj = new TextToSpeech(getApplicationContext(), this);
         pbullet = new PBullet();
         PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     @Override
     public void onInit(int status) {
         if (status != TextToSpeech.ERROR) {
-            ttobj.setLanguage(Locale.UK);
+            ttsobj.setLanguage(Locale.UK);
         }
     }
 
@@ -123,7 +123,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else if (intentText.equals("alarm-trigger")) {
             setAlertStatus(AlertStatus.MINI);
             sendExcessiveAlert();
-            ttobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
+            ttsobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
         } else if (intentText.equals("bt-on")) {
             mBle.arduinoConnect();
         } else if (intentText.equals("bt-off")) {
@@ -141,7 +141,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else if (intentText.equals("siren-forever")) {
             BikeSiren.onForever(mBle.mService);
         } else {
-            ttobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
+            ttsobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
         Utils.postReqThread(Utils.METEOR_URL + "/tts-received");
     }
@@ -183,7 +183,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             Log.d(TAG, "Sending mini alert.");
             if (isProduction) {
                 Date date = new Date();
-                ttobj.speak("Welcome to the smart bike. If you'd like this moved, please call the number on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
+                ttsobj.speak("Welcome to the smart bike. If you'd like this moved, please call the number on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
                 BikeLEDLights.turnOn(mBle.mService);
                 pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
             } else {
@@ -202,9 +202,9 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                 mMeteor.alarmTrigger();
                 Date date = new Date();
                 BikeSiren.onShort(mBle.mService);
-                ttobj.speak("This doesn't need a thick lock because it's GPS tracked and constantly monitored", TextToSpeech.QUEUE_FLUSH, null);
+                ttsobj.speak("This doesn't need a thick lock because it's GPS tracked and constantly monitored", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Phone moved LOTS!", "At " + date.toString());
-                SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved LOTS -- " + date.toString(), null, null);
+                SmsManager.getDefault().sendTextMessage("+16506447811", null, "Phone moved LOTS -- " + date.toString(), null, null);
             } else {
                 v.vibrate(500);
             }
@@ -219,9 +219,9 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             if (isProduction) {
                 mMeteor.alarmTrigger();
                 Date date = new Date();
-                ttobj.speak("The lock has been cut. Palo Alto authorities notified.", TextToSpeech.QUEUE_FLUSH, null);
+                ttsobj.speak("The lock has been cut. Palo Alto authorities notified.", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Chain cut!", "At " + date.toString());
-                SmsManager.getDefault().sendTextMessage("+15125778778", null, "Chain cut! -- " + date.toString(), null, null);
+                SmsManager.getDefault().sendTextMessage("+16506447811", null, "Chain cut! -- " + date.toString(), null, null);
             } else {
                 v.vibrate(500);
             }

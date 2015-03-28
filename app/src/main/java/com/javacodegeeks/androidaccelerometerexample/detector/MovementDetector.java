@@ -28,7 +28,7 @@ public class MovementDetector {
         accelQueueDetector = new ConcurrentLinkedQueue<AccelTime>();
         accelQueueMeteor = new AccelQueue();
         movementTimesQueue = new ConcurrentLinkedQueue<Long>();
-        vibrateThreshold = (float) .5;
+        vibrateThreshold = (float) 1.0;
     }
 
     public void add(AccelTime accelTime) {
