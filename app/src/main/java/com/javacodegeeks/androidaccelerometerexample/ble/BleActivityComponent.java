@@ -131,7 +131,7 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
     }
 
     public void arduinoConnect() {
-        String deviceAddress = "D8:8C:7B:9F:AA:5B";
+        String deviceAddress = "C9:72:6F:40:66:D9";
         mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress);
 
         if (mDevice.getName() == null) {
@@ -174,25 +174,12 @@ public class BleActivityComponent implements RadioGroup.OnCheckedChangeListener{
     };
 
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-
-                @Override
-                public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//
-//                            runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    addDevice(device,rssi);
-//                                }
-//                            });
-//
-//                        }
-//                    });
-                }
-            };
+        new BluetoothAdapter.LeScanCallback() {
+            @Override
+            public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
+                // TODO this is unnecessary, I'm doing nothing
+            }
+        };
 
     public void disconnect() {
         if (mDevice!=null) {
