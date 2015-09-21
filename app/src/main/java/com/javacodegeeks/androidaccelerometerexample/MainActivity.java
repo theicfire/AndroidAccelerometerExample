@@ -47,6 +47,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     private ToneGenerator toneGenerator;
     private Button btnConnectDisconnect;
     private boolean autoSiren = true;
+    private final String PHONE_NUMBER = "+15125778778";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -221,7 +222,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                 Date date = new Date();
                 ttsobj.speak("This doesn't need a thick lock because it's GPS tracked and constantly monitored", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Phone moved LOTS!", "At " + date.toString());
-                SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved LOTS -- " + date.toString(), null, null);
+                SmsManager.getDefault().sendTextMessage(PHONE_NUMBER, null, "Phone moved LOTS -- " + date.toString(), null, null);
             } else {
                 v.vibrate(500);
             }
