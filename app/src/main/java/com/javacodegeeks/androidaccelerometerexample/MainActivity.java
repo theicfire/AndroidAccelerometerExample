@@ -45,6 +45,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     private AlertStatus alertStatus;
     private TextView excessiveAlertStatusView;
     private Handler mHandler;
+    private ToneGenerator toneGenerator;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,6 +82,8 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         movementDetector = new MovementDetector(this);
         startExcessiveAlertStatusUpdate();
         Utils.postReqThread(Utils.METEOR_URL + "/phonestart");
+
+        toneGenerator = new ToneGenerator();
     }
 
     @Override
@@ -125,9 +128,11 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             sendExcessiveAlert();
             ttsobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
         } else if (intentText.equals("bt-on")) {
-            mBle.arduinoConnect();
+//            mBle.arduinoConnect();
+            toneGenerator.play();
         } else if (intentText.equals("bt-off")) {
-            mBle.disconnect();
+//            mBle.disconnect();
+            toneGenerator.stop();
         } else if (intentText.equals("lon")) {
             BikeLEDLights.turnOn(mBle.mService);
         } else if (intentText.equals("loff")) {
@@ -204,7 +209,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                 BikeSiren.onShort(mBle.mService);
                 ttsobj.speak("This doesn't need a thick lock because it's GPS tracked and constantly monitored", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Phone moved LOTS!", "At " + date.toString());
-                SmsManager.getDefault().sendTextMessage("+16506447811", null, "Phone moved LOTS -- " + date.toString(), null, null);
+                SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved LOTS -- " + date.toString(), null, null);
             } else {
                 v.vibrate(500);
             }
@@ -221,7 +226,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                 Date date = new Date();
                 ttsobj.speak("The lock has been cut. Palo Alto authorities notified.", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Chain cut!", "At " + date.toString());
-                SmsManager.getDefault().sendTextMessage("+16506447811", null, "Chain cut! -- " + date.toString(), null, null);
+                SmsManager.getDefault().sendTextMessage("+15125778778", null, "Chain cut! -- " + date.toString(), null, null);
             } else {
                 v.vibrate(500);
             }

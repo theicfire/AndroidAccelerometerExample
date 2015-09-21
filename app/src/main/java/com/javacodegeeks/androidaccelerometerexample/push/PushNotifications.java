@@ -45,7 +45,7 @@ public class PushNotifications {
      * Substitute you own sender ID here. This is the project number you got
      * from the API Console, as described in "Getting Started."
      */
-    String SENDER_ID = "889334644472";
+    String SENDER_ID = "824831309274";
 
     /**
      * Tag used on log messages.
@@ -186,6 +186,11 @@ public class PushNotifications {
                     // exponential back-off.
                 }
                 return msg;
+            }
+
+            @Override
+            protected void onPostExecute(String res) {
+                Log.d(TAG, "doInBackground returned " + res);
             }
 
         }.execute(justSendRegistration);
