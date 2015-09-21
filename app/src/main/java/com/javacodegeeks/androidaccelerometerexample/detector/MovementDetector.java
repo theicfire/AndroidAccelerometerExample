@@ -32,15 +32,19 @@ public class MovementDetector {
     }
 
     public void add(AccelTime accelTime) {
-        if (Alertable.AlertStatus.MINI.compareTo(alert.getAlertStatus()) >= 0 &&
-                maxAccelDifference(accelTime) > vibrateThreshold) {
-            Log.d(TAG, "Diff is great enough!");
-            alert.sendMiniAlert();
-            if (timeLeftToAlertIfAdded(System.currentTimeMillis()) > 0) {
-                alert.sendExcessiveAlert();
-            }
-            movementTimesQueue.add(System.currentTimeMillis());
+        if (maxAccelDifference(accelTime) > vibrateThreshold) {
+            alert.alert();
             accelQueueDetector.clear();
+            if (Alertable.AlertStatus.MINI.compareTo(alert.getAlertStatus()) >= 0) {
+                Log.d(TAG, "Diff is great enough!");
+                alert.sendMiniAlert();
+                if (timeLeftToAlertIfAdded(System.currentTimeMillis()) > 0) {
+                    alert.sendExcessiveAlert();
+                }
+                movementTimesQueue.add(System.currentTimeMillis());
+            }
+        } else {
+            alert.noAlert();
         }
         accelQueueDetector.add(accelTime);
         accelQueueMeteor.accelsToSend.add(accelTime);

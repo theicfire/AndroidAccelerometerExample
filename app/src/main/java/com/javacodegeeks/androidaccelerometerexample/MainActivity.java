@@ -46,6 +46,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     private Handler mHandler;
     private ToneGenerator toneGenerator;
     private Button btnConnectDisconnect;
+    private boolean autoSiren = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -180,10 +181,25 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     }
 
     @Override
+    public void noAlert() {
+        toneGenerator.stop();
+    }
+
+    @Override
+    public void alert() {
+        if (autoSiren) {
+            Log.d(TAG, "play!");
+            toneGenerator.play();
+        }
+    }
+
+    @Override
     public void sendMiniAlert() {
+
         if (alertStatus == AlertStatus.UNTRIGGERED) {
             setAlertStatus(AlertStatus.MINI);
             Log.d(TAG, "Sending mini alert.");
+
             if (isProduction) {
                 Date date = new Date();
                 ttsobj.speak("Welcome to the smart bike. If you'd like this moved, please call the number on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);

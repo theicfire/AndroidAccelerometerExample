@@ -14,6 +14,8 @@ public interface Alertable {
 
     void sendMiniAlert();
     void unsetMiniAlert();
+    void noAlert();
+    void alert();
     void sendExcessiveAlert();
     AlertStatus getAlertStatus();
 }

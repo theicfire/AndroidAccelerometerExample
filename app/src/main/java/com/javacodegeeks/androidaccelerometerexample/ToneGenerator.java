@@ -27,28 +27,40 @@ public class ToneGenerator {
     private final int numSamples = 5000;
     private final double freqOfTone = 2400;
     private final byte generatedSnd[] = new byte[2 * numSamples];
-    private boolean playing = true;
     private final int MAX_SIGNED_16_BIT = (int) Math.pow(2, 15) - 1;
+    final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+            sampleRate, AudioFormat.CHANNEL_OUT_MONO,
+            AudioFormat.ENCODING_PCM_16BIT, generatedSnd.length,
+            AudioTrack.MODE_STREAM);
+
 
     public ToneGenerator() {
         if (freqOfTone >= numSamples / 2) throw new AssertionError("Sample rate must be high enough to support Nyquist theorom");
         if (freqOfTone % (sampleRate / numSamples) != 0) throw new AssertionError("frequency must be a multiple of " + (sampleRate / numSamples) + " to keep streaming continuous");
-
+        genTone();
     }
 
     public void play() {
-        playing = true;
-        genTone();
+        if (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
-                playSound();
+                Log.d(TAG, "Startplay");
+                audioTrack.play();
+                while (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
+                    audioTrack.write(generatedSnd, 0, generatedSnd.length);
+                }
+                Log.d(TAG, "Endplay");
             }
         }).start();
     }
 
     public void stop() {
-        playing = false;
+//        audioTrack.pause();
+//        audioTrack.flush();
+        audioTrack.stop();
     }
 
     private void genTone(){
@@ -61,23 +73,11 @@ public class ToneGenerator {
             // in 16 bit wav PCM, first byte is the low order byte
             generatedSnd[i * 2] = (byte) (val & 0x00ff);
             generatedSnd[i * 2 + 1] = (byte) ((val & 0xff00) >>> 8);
-
-        }
-    }
-
-    private void playSound(){
-        final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                sampleRate, AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT, generatedSnd.length,
-                AudioTrack.MODE_STREAM);
-        audioTrack.play();
-        while (playing) {
-            audioTrack.write(generatedSnd, 0, generatedSnd.length);
         }
     }
 
     public void toggle() {
-        if (!playing) {
+        if (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_PLAYING) {
             play();
         } else {
             stop();
