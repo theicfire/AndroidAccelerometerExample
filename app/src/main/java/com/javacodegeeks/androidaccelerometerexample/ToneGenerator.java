@@ -31,8 +31,9 @@ public class ToneGenerator {
     private final int MAX_SIGNED_16_BIT = (int) Math.pow(2, 15) - 1;
 
     public ToneGenerator() {
-        assert(freqOfTone < numSamples / 2); // Nyquist theorom
-        assert(freqOfTone % (sampleRate / numSamples) == 0); // Keep the sound continuous
+        if (freqOfTone >= numSamples / 2) throw new AssertionError("Sample rate must be high enough to support Nyquist theorom");
+        if (freqOfTone % (sampleRate / numSamples) != 0) throw new AssertionError("frequency must be a multiple of " + (sampleRate / numSamples) + " to keep streaming continuous");
+
     }
 
     public void play() {
