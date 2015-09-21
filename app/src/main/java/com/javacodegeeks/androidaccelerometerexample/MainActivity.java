@@ -16,6 +16,8 @@ import android.speech.tts.TextToSpeech;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.javacodegeeks.androidaccelerometerexample.ble.BleActivityComponent;
@@ -38,7 +40,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     private boolean isProduction = false;
     private PBullet pbullet;
     private PowerManager.WakeLock mWakeLock;
-    private BleActivityComponent mBle;
+//    private BleActivityComponent mBle;
     public MovementDetector movementDetector;
     private TextView countView, alertStatusView;
     private int count;
@@ -46,6 +48,9 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     private TextView excessiveAlertStatusView;
     private Handler mHandler;
     private ToneGenerator toneGenerator;
+    private Button btnConnectDisconnect;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,7 +80,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         mWakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         // Needed to have accelerometer readings stay up to date, and not delay when the screen is off.
         mWakeLock.acquire();
-        mBle = new BleActivityComponent(this);
+//        mBle = new BleActivityComponent(this);
         countView = (TextView) findViewById(R.id.count);
         alertStatusView = (TextView) findViewById(R.id.alertStatus);
         excessiveAlertStatusView = (TextView) findViewById(R.id.excessiveAlertStatus);
@@ -84,6 +89,14 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         Utils.postReqThread(Utils.METEOR_URL + "/phonestart");
 
         toneGenerator = new ToneGenerator();
+        btnConnectDisconnect=(Button) this.findViewById(R.id.btn_select);
+        btnConnectDisconnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toneGenerator.toggle();
+            }
+        });
+
     }
 
     @Override
@@ -134,17 +147,17 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 //            mBle.disconnect();
             toneGenerator.stop();
         } else if (intentText.equals("lon")) {
-            BikeLEDLights.turnOn(mBle.mService);
+//            BikeLEDLights.turnOn(mBle.mService);
         } else if (intentText.equals("loff")) {
-            BikeLEDLights.turnOff(mBle.mService);
+//            BikeLEDLights.turnOff(mBle.mService);
         } else if (intentText.equals("chain-on")) {
-            BikeChain.turnOn(mBle.mService);
+//            BikeChain.turnOn(mBle.mService);
         } else if (intentText.equals("siren-short")) {
-            BikeSiren.onShort(mBle.mService);
+//            BikeSiren.onShort(mBle.mService);
         } else if (intentText.equals("siren-medium")) {
-            BikeSiren.onMedium(mBle.mService);
+//            BikeSiren.onMedium(mBle.mService);
         } else if (intentText.equals("siren-forever")) {
-            BikeSiren.onForever(mBle.mService);
+//            BikeSiren.onForever(mBle.mService);
         } else {
             ttsobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
@@ -158,7 +171,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else {
             gpsMonitor.gpsOff();
             movementDetector.reset();
-            BikeLEDLights.turnOff(mBle.mService);
+//            BikeLEDLights.turnOff(mBle.mService);
             excessiveAlertStatusView.setText("Need first bump");
         }
         updateAlertStatusView();
@@ -189,7 +202,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             if (isProduction) {
                 Date date = new Date();
                 ttsobj.speak("Welcome to the smart bike. If you'd like this moved, please call the number on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
-                BikeLEDLights.turnOn(mBle.mService);
+//                BikeLEDLights.turnOn(mBle.mService);
                 pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
             } else {
                 v.vibrate(50);
@@ -206,7 +219,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             if (isProduction) {
                 mMeteor.alarmTrigger();
                 Date date = new Date();
-                BikeSiren.onShort(mBle.mService);
+//                BikeSiren.onShort(mBle.mService);
                 ttsobj.speak("This doesn't need a thick lock because it's GPS tracked and constantly monitored", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Phone moved LOTS!", "At " + date.toString());
                 SmsManager.getDefault().sendTextMessage("+15125778778", null, "Phone moved LOTS -- " + date.toString(), null, null);
@@ -240,14 +253,14 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         mWakeLock.release();
         mMeteor.mMeteor.disconnect();
         sensorManager.unregisterListener(this);
-        try {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mBle.UARTStatusChangeReceiver);
-        } catch (Exception ignore) {
-            Log.e(TAG, ignore.toString());
-        }
-        unbindService(mBle.mServiceConnection);
-        mBle.mService.stopSelf();
-        mBle.mService = null;
+//        try {
+//            LocalBroadcastManager.getInstance(this).unregisterReceiver(mBle.UARTStatusChangeReceiver);
+//        } catch (Exception ignore) {
+//            Log.e(TAG, ignore.toString());
+//        }
+//        unbindService(mBle.mServiceConnection);
+//        mBle.mService.stopSelf();
+//        mBle.mService = null;
     }
 
 
@@ -255,15 +268,15 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        if (!mBle.mBtAdapter.isEnabled()) {
-            Log.i(TAG, "onResume - BT not enabled yet");
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            this.startActivityForResult(enableIntent, BleActivityComponent.REQUEST_ENABLE_BT);
-        }
+//        if (!mBle.mBtAdapter.isEnabled()) {
+//            Log.i(TAG, "onResume - BT not enabled yet");
+//            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//            this.startActivityForResult(enableIntent, BleActivityComponent.REQUEST_ENABLE_BT);
+//        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mBle.onActivityResult(requestCode, resultCode, data);
+//        mBle.onActivityResult(requestCode, resultCode, data);
     }
 
     private void startExcessiveAlertStatusUpdate() {
