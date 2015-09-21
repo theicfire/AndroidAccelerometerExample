@@ -24,7 +24,7 @@ import java.util.List;
 public class ToneGenerator {
     private final static String TAG = ToneGenerator.class.getSimpleName();
     private final int sampleRate = 40000;
-    private final int numSamples = 5000;
+    private final int numSamples = sampleRate;
     private final double freqOfTone = 2400;
     private final byte generatedSnd[] = new byte[2 * numSamples];
     private final int MAX_SIGNED_16_BIT = (int) Math.pow(2, 15) - 1;
@@ -58,9 +58,8 @@ public class ToneGenerator {
     }
 
     public void stop() {
-//        audioTrack.pause();
-//        audioTrack.flush();
-        audioTrack.stop();
+        audioTrack.pause();
+        audioTrack.flush();
     }
 
     private void genTone(){

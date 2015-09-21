@@ -20,8 +20,11 @@ public class MovementDetector {
     private Queue<Long> movementTimesQueue;
     private Alertable alert;
 
+    private long lastAlertTime = 0;
+
     private static final int MAX_NOTIFY_DELTA = 25 * 1000;
     private static final int MIN_NOTIFY_DELTA = 10 * 1000;
+    private static final int TIME_TO_OFF_ALERT = 250;
 
     public MovementDetector(Alertable alert) {
         this.alert = alert;
@@ -35,6 +38,7 @@ public class MovementDetector {
         if (maxAccelDifference(accelTime) > vibrateThreshold) {
             alert.alert();
             accelQueueDetector.clear();
+            lastAlertTime = System.currentTimeMillis();
             if (Alertable.AlertStatus.MINI.compareTo(alert.getAlertStatus()) >= 0) {
                 Log.d(TAG, "Diff is great enough!");
                 alert.sendMiniAlert();
@@ -44,7 +48,9 @@ public class MovementDetector {
                 movementTimesQueue.add(System.currentTimeMillis());
             }
         } else {
-            alert.noAlert();
+            if (lastAlertTime + TIME_TO_OFF_ALERT < System.currentTimeMillis()) {
+                alert.noAlert();
+            }
         }
         accelQueueDetector.add(accelTime);
         accelQueueMeteor.accelsToSend.add(accelTime);
