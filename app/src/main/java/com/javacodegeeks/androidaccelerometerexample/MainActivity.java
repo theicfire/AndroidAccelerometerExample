@@ -135,7 +135,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else if (intentText.equals("alarm-trigger")) {
             setAlertStatus(AlertStatus.MINI);
             sendExcessiveAlert();
-            ttsobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
+//            ttsobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
         } else if (intentText.equals("bt-on")) {
             toneGenerator.play();
         } else if (intentText.equals("bt-off")) {
@@ -153,7 +153,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else if (intentText.equals("siren-medium")) {
         } else if (intentText.equals("siren-forever")) {
         } else {
-            ttsobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
+//            ttsobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
         Utils.postReqThread(Utils.METEOR_URL + "/tts-received");
     }
@@ -209,7 +209,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 
             if (isProduction) {
                 Date date = new Date();
-                ttsobj.speak("Welcome to the smart bike. If you'd like this moved, please call the number on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
+//                ttsobj.speak("Welcome to the smart bike. If you'd like this moved, please call the number on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
             } else {
                 v.vibrate(50);
@@ -226,7 +226,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             if (isProduction) {
                 mMeteor.alarmTrigger();
                 Date date = new Date();
-                ttsobj.speak("This doesn't need a thick lock because it's GPS tracked and constantly monitored", TextToSpeech.QUEUE_FLUSH, null);
+//                ttsobj.speak("This doesn't need a thick lock because it's GPS tracked and constantly monitored", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Phone moved LOTS!", "At " + date.toString());
                 SmsManager.getDefault().sendTextMessage(PHONE_NUMBER, null, "Phone moved LOTS -- " + date.toString(), null, null);
             } else {
