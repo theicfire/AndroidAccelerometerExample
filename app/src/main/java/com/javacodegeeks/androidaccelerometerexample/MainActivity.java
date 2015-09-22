@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     private Handler mHandler;
     private ToneGenerator toneGenerator;
     private Button btnConnectDisconnect;
-    private boolean autoSiren = true;
+    private boolean autoSiren = false;
     private final String PHONE_NUMBER = "+15125778778";
 
     @Override
@@ -143,6 +143,12 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else if (intentText.equals("lon")) {
         } else if (intentText.equals("loff")) {
         } else if (intentText.equals("chain-on")) {
+        } else if (intentText.equals("auto-siren-on")) {
+            autoSiren = true;
+            Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/true");
+        } else if (intentText.equals("auto-siren-off")) {
+            autoSiren = false;
+            Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/false");
         } else if (intentText.equals("siren-short")) {
         } else if (intentText.equals("siren-medium")) {
         } else if (intentText.equals("siren-forever")) {
