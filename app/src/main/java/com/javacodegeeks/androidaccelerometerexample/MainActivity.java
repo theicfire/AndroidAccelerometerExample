@@ -152,6 +152,10 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else if (intentText.equals("siren-short")) {
         } else if (intentText.equals("siren-medium")) {
         } else if (intentText.equals("siren-forever")) {
+        } else if (intentText.startsWith("sensitivity")) {
+            float sensitivity = Float.parseFloat(intentText.substring("sensitivity".length()));
+            Log.d(TAG, "Set senstivity to " + sensitivity);
+            movementDetector.vibrateThreshold = sensitivity;
         } else {
 //            ttsobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }

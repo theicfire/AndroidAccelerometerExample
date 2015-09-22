@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class MovementDetector {
     private final static String TAG = MovementDetector.class.getSimpleName();
-    private final float vibrateThreshold;
+    public float vibrateThreshold;
     private Queue<AccelTime> accelQueueDetector;
     public AccelQueue accelQueueMeteor;
     private Queue<Long> movementTimesQueue;
