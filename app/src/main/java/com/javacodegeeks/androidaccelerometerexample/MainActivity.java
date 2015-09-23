@@ -183,7 +183,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     }
 
     @Override
-    public void unsetFirstMoveAlert() {
+    public void resetAlertStatus() {
         setAlertStatus(AlertStatus.UNTRIGGERED);
     }
 
@@ -270,7 +270,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                                         excessiveAlertStatusView.setText("Second bump trigger until " + timeLeftToAlert);
                                     } else if (timeLeftToAlert == -999) {
                                         excessiveAlertStatusView.setText("Need first bump");
-                                        unsetFirstMoveAlert();
+                                        resetAlertStatus();
                                     } else {
                                         excessiveAlertStatusView.setText("Require second bump in " + timeLeftToAlert);
                                     }

@@ -15,7 +15,7 @@ public interface Alertable {
     void noMoveAlert();
     void moveAlert();
     void firstMoveAlert();
-    void unsetFirstMoveAlert();
     void excessiveMoveAlert();
+    void resetAlertStatus();
     AlertStatus getAlertStatus();
 }
