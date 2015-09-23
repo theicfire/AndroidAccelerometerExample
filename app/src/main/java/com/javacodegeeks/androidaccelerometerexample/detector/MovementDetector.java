@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.javacodegeeks.androidaccelerometerexample.AccelQueue;
 import com.javacodegeeks.androidaccelerometerexample.AccelTime;
+import com.javacodegeeks.androidaccelerometerexample.Utils;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class MovementDetector {
     private final static String TAG = MovementDetector.class.getSimpleName();
-    public float sensitivity;
+    private float sensitivity;
     private Queue<AccelTime> accelQueueDetector;
     public AccelQueue accelQueueMeteor;
     private Queue<Long> movementTimesQueue;
@@ -34,12 +35,13 @@ public class MovementDetector {
         accelQueueDetector = new ConcurrentLinkedQueue<AccelTime>();
         accelQueueMeteor = new AccelQueue();
         movementTimesQueue = new ConcurrentLinkedQueue<Long>();
-        sensitivity = NORMAL_SENSITIVITY;
+        setSensitivity(NORMAL_SENSITIVITY);
     }
 
     public void setSensitivity(float sensitivity) {
         Log.d(TAG, "Set senstivity to " + sensitivity);
         this.sensitivity = sensitivity;
+        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/sensitivity/" + sensitivity);
     }
 
     public void setHighSensitivity() {
