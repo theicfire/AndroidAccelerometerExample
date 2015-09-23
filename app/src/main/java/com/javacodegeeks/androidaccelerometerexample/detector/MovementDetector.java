@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class MovementDetector {
     private final static String TAG = MovementDetector.class.getSimpleName();
-    public float vibrateThreshold;
+    public float sensitivity;
     private Queue<AccelTime> accelQueueDetector;
     public AccelQueue accelQueueMeteor;
     private Queue<Long> movementTimesQueue;
@@ -26,30 +26,41 @@ public class MovementDetector {
     private static final int MIN_NOTIFY_DELTA = 10 * 1000;
     private static final int TIME_TO_OFF_ALERT = 250;
 
+    private static final float HIGH_SENSITIVITY = (float) .4;
+
     public MovementDetector(Alertable alert) {
         this.alert = alert;
         accelQueueDetector = new ConcurrentLinkedQueue<AccelTime>();
         accelQueueMeteor = new AccelQueue();
         movementTimesQueue = new ConcurrentLinkedQueue<Long>();
-        vibrateThreshold = (float) 1.0;
+        sensitivity = (float) 1.0;
+    }
+
+    public void setSensitivity(float sensitivity) {
+        Log.d(TAG, "Set senstivity to " + sensitivity);
+        this.sensitivity = sensitivity;
+    }
+
+    public void setHighSensitivity() {
+        setSensitivity(HIGH_SENSITIVITY);
     }
 
     public void add(AccelTime accelTime) {
-        if (maxAccelDifference(accelTime) > vibrateThreshold) {
-            alert.alert();
+        if (maxAccelDifference(accelTime) > sensitivity) {
+            alert.moveAlert();
             accelQueueDetector.clear();
             lastAlertTime = System.currentTimeMillis();
             if (Alertable.AlertStatus.MINI.compareTo(alert.getAlertStatus()) >= 0) {
                 Log.d(TAG, "Diff is great enough!");
-                alert.sendMiniAlert();
+                alert.firstMoveAlert();
                 if (timeLeftToAlertIfAdded(System.currentTimeMillis()) > 0) {
-                    alert.sendExcessiveAlert();
+                    alert.excessiveMoveAlert();
                 }
                 movementTimesQueue.add(System.currentTimeMillis());
             }
         } else {
             if (lastAlertTime + TIME_TO_OFF_ALERT < System.currentTimeMillis()) {
-                alert.noAlert();
+                alert.noMoveAlert();
             }
         }
         accelQueueDetector.add(accelTime);

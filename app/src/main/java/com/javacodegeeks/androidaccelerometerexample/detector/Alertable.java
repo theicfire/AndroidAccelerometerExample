@@ -12,10 +12,10 @@ public interface Alertable {
         CHAIN_CUT
     };
 
-    void sendMiniAlert();
-    void unsetMiniAlert();
-    void noAlert();
-    void alert();
-    void sendExcessiveAlert();
+    void noMoveAlert();
+    void moveAlert();
+    void firstMoveAlert();
+    void unsetFirstMoveAlert();
+    void excessiveMoveAlert();
     AlertStatus getAlertStatus();
 }

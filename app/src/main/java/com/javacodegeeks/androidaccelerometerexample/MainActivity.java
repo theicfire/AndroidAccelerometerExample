@@ -1,7 +1,6 @@
 package com.javacodegeeks.androidaccelerometerexample;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
@@ -13,7 +12,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
-import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -134,8 +132,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             setAlertStatus(AlertStatus.UNTRIGGERED);
         } else if (intentText.equals("alarm-trigger")) {
             setAlertStatus(AlertStatus.MINI);
-            sendExcessiveAlert();
-//            ttsobj.speak("Artifically triggered.", TextToSpeech.QUEUE_FLUSH, null);
+            excessiveMoveAlert();
         } else if (intentText.equals("bt-on")) {
             toneGenerator.play();
         } else if (intentText.equals("bt-off")) {
@@ -152,14 +149,13 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         } else if (intentText.equals("siren-short")) {
         } else if (intentText.equals("siren-medium")) {
         } else if (intentText.equals("siren-forever")) {
-        } else if (intentText.startsWith("sensitivity")) {
+        } else if (intentText.toLowerCase().startsWith("sensitivity")) {
             float sensitivity = Float.parseFloat(intentText.substring("sensitivity".length()));
-            Log.d(TAG, "Set senstivity to " + sensitivity);
-            movementDetector.vibrateThreshold = sensitivity;
+            movementDetector.setSensitivity(sensitivity);
         } else {
 //            ttsobj.speak(intentText, TextToSpeech.QUEUE_FLUSH, null);
         }
-        Utils.postReqThread(Utils.METEOR_URL + "/tts-received");
+        Utils.postReqThread(Utils.METEOR_URL + "/tts-received"); // TODO + "/" + intentText .. read that in meteor
     }
 
     public void setAlertStatus(AlertStatus a) {
@@ -187,17 +183,17 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     }
 
     @Override
-    public void unsetMiniAlert() {
+    public void unsetFirstMoveAlert() {
         setAlertStatus(AlertStatus.UNTRIGGERED);
     }
 
     @Override
-    public void noAlert() {
+    public void noMoveAlert() {
         toneGenerator.stop();
     }
 
     @Override
-    public void alert() {
+    public void moveAlert() {
         if (autoSiren) {
             Log.d(TAG, "play!");
             toneGenerator.play();
@@ -205,7 +201,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     }
 
     @Override
-    public void sendMiniAlert() {
+    public void firstMoveAlert() {
 
         if (alertStatus == AlertStatus.UNTRIGGERED) {
             setAlertStatus(AlertStatus.MINI);
@@ -213,7 +209,6 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 
             if (isProduction) {
                 Date date = new Date();
-//                ttsobj.speak("Welcome to the smart bike. If you'd like this moved, please call the number on the handlebars.", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
             } else {
                 v.vibrate(50);
@@ -222,15 +217,15 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     }
 
     @Override
-    public void sendExcessiveAlert() {
+    public void excessiveMoveAlert() {
         if (AlertStatus.MINI.compareTo(alertStatus) >= 0) {
             excessiveAlertStatusView.setText("Triggered!");
             setAlertStatus(AlertStatus.EXCESSIVE);
-            Log.d(TAG, "sendExcessiveAlert.");
+            Log.d(TAG, "excessiveMoveAlert.");
+            movementDetector.setHighSensitivity();
             if (isProduction) {
                 mMeteor.alarmTrigger();
                 Date date = new Date();
-//                ttsobj.speak("This doesn't need a thick lock because it's GPS tracked and constantly monitored", TextToSpeech.QUEUE_FLUSH, null);
                 pbullet.send("Phone moved LOTS!", "At " + date.toString());
                 SmsManager.getDefault().sendTextMessage(PHONE_NUMBER, null, "Phone moved LOTS -- " + date.toString(), null, null);
             } else {
@@ -275,7 +270,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                                         excessiveAlertStatusView.setText("Second bump trigger until " + timeLeftToAlert);
                                     } else if (timeLeftToAlert == -999) {
                                         excessiveAlertStatusView.setText("Need first bump");
-                                        unsetMiniAlert();
+                                        unsetFirstMoveAlert();
                                     } else {
                                         excessiveAlertStatusView.setText("Require second bump in " + timeLeftToAlert);
                                     }
