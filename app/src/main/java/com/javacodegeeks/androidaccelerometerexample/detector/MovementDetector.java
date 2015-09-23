@@ -27,13 +27,14 @@ public class MovementDetector {
     private static final int TIME_TO_OFF_ALERT = 250;
 
     private static final float HIGH_SENSITIVITY = (float) .4;
+    private static final float NORMAL_SENSITIVITY = (float) 1.0;
 
     public MovementDetector(Alertable alert) {
         this.alert = alert;
         accelQueueDetector = new ConcurrentLinkedQueue<AccelTime>();
         accelQueueMeteor = new AccelQueue();
         movementTimesQueue = new ConcurrentLinkedQueue<Long>();
-        sensitivity = (float) 1.0;
+        sensitivity = NORMAL_SENSITIVITY;
     }
 
     public void setSensitivity(float sensitivity) {
