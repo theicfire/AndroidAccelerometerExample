@@ -129,7 +129,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/prodOn/false");
             Log.d(TAG, "PRODUCTION OFF");
         } else if (intentText.equals("alarm-reset")) {
-            setAlertStatus(AlertStatus.UNTRIGGERED);
+            resetAlertStatus();
         } else if (intentText.equals("alarm-trigger")) {
             setAlertStatus(AlertStatus.MINI);
             excessiveMoveAlert();
@@ -185,6 +185,9 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
     @Override
     public void resetAlertStatus() {
         setAlertStatus(AlertStatus.UNTRIGGERED);
+        movementDetector.setSensitivity((float) 1.0);
+        autoSiren = false;
+        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/false");
     }
 
     @Override
@@ -223,6 +226,8 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             setAlertStatus(AlertStatus.EXCESSIVE);
             Log.d(TAG, "excessiveMoveAlert.");
             movementDetector.setHighSensitivity();
+            autoSiren = true;
+            Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/true");
             if (isProduction) {
                 mMeteor.alarmTrigger();
                 Date date = new Date();

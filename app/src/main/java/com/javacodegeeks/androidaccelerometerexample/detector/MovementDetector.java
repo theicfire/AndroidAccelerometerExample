@@ -24,7 +24,7 @@ public class MovementDetector {
     private long lastAlertTime = 0;
 
     private static final int MAX_NOTIFY_DELTA = 25 * 1000;
-    private static final int MIN_NOTIFY_DELTA = 10 * 1000;
+    private static final int MIN_NOTIFY_DELTA = 2 * 1000;
     private static final int TIME_TO_OFF_ALERT = 250;
 
     private static final float HIGH_SENSITIVITY = (float) .4;
@@ -39,9 +39,9 @@ public class MovementDetector {
     }
 
     public void setSensitivity(float sensitivity) {
-        Log.d(TAG, "Set senstivity to " + sensitivity);
+        Log.d(TAG, "Set sensitivity to " + sensitivity);
         this.sensitivity = sensitivity;
-        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/sensitivity/" + sensitivity);
+        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/sensitivityLevel/" + sensitivity);
     }
 
     public void setHighSensitivity() {
