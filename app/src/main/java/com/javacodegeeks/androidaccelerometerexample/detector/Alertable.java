@@ -8,8 +8,7 @@ public interface Alertable {
     public enum AlertStatus{
         UNTRIGGERED,
         MINI,
-        EXCESSIVE,
-        CHAIN_CUT
+        EXCESSIVE
     };
 
     void noMoveAlert();

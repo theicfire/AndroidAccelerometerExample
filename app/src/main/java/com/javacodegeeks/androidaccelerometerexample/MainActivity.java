@@ -139,7 +139,6 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             toneGenerator.stop();
         } else if (intentText.equals("lon")) {
         } else if (intentText.equals("loff")) {
-        } else if (intentText.equals("chain-on")) {
         } else if (intentText.equals("auto-siren-on")) {
             autoSiren = true;
             Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/true");
@@ -300,9 +299,6 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                 break;
             case EXCESSIVE:
                 alertStatusView.setText("Excessive movement");
-                break;
-            case CHAIN_CUT:
-                alertStatusView.setText("Chain cut!");
                 break;
         }
     }
