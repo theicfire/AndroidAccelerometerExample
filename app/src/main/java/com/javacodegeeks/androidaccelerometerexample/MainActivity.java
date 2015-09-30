@@ -130,24 +130,12 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             Log.d(TAG, "PRODUCTION OFF");
         } else if (intentText.equals("alarm-reset")) {
             resetAlertStatus();
-        } else if (intentText.equals("alarm-trigger")) {
-            setAlertStatus(AlertStatus.MINI);
-            excessiveMoveAlert();
-        } else if (intentText.equals("bt-on")) {
-            toneGenerator.play();
-        } else if (intentText.equals("bt-off")) {
-            toneGenerator.stop();
-        } else if (intentText.equals("lon")) {
-        } else if (intentText.equals("loff")) {
         } else if (intentText.equals("auto-siren-on")) {
             autoSiren = true;
             Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/true");
         } else if (intentText.equals("auto-siren-off")) {
             autoSiren = false;
             Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/false");
-        } else if (intentText.equals("siren-short")) {
-        } else if (intentText.equals("siren-medium")) {
-        } else if (intentText.equals("siren-forever")) {
         } else if (intentText.toLowerCase().startsWith("sensitivity")) {
             float sensitivity = Float.parseFloat(intentText.substring("sensitivity".length()));
             movementDetector.setSensitivity(sensitivity);
