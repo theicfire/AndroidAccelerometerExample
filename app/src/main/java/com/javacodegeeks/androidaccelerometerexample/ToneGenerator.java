@@ -74,14 +74,6 @@ public class ToneGenerator {
             generatedSnd[i * 2 + 1] = (byte) ((val & 0xff00) >>> 8);
         }
     }
-
-    public void toggle() {
-        if (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_PLAYING) {
-            play();
-        } else {
-            stop();
-        }
-    }
 }
 
 

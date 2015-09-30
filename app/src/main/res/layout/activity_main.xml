@@ -51,7 +51,7 @@
         android:layout_gravity="center"
         android:layout_marginBottom="10dp"
         android:layout_marginTop="20dp"
-        android:text="Excessive Alert Status"
+        android:text="Time till reset"
         android:textSize="15dp" />
 
     <TextView
@@ -60,7 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="0dp"
-        android:text="Need first bump"
+        android:text="Init"
         android:textSize="20dp" />
 
     <LinearLayout
@@ -74,65 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="12dp"
-            android:text="Connect" />
+            android:text="Do Nothing :)" />
     </LinearLayout>
-    <RelativeLayout
-        android:id="@+id/RelativeLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:orientation="vertical" >
-
-        <EditText
-            android:id="@+id/sendText"
-            android:layout_width="102dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_toLeftOf="@+id/sendButton"
-            android:ems="10"
-            android:enabled="false"
-            android:fontFamily="1"
-            android:lines="1"
-            android:maxLength="20"
-            android:maxLines="1"
-            android:shadowRadius="1" />
-
-        <Button
-            android:id="@+id/sendButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:enabled="false"
-            android:text="Send" />
-            <TextView
-                android:id="@+id/deviceLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:text="device" />
-
-            <TextView
-                android:id="@+id/deviceName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginLeft="18dp"
-                android:layout_toRightOf="@+id/deviceLabel"
-                android:text="select a device"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-
-            <TextView
-                android:id="@+id/rssival"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:text="_"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-    </RelativeLayout>
 
 </LinearLayout>

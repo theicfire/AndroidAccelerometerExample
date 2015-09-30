@@ -7,13 +7,15 @@ package com.javacodegeeks.androidaccelerometerexample.detector;
 public interface Alertable {
     public enum AlertStatus{
         UNTRIGGERED,
-        MINI,
-        EXCESSIVE
+        FIRST_ALERT,
+        SECOND_ALERT,
+        EXCESSIVE_ALERT
     };
 
     void noMoveAlert();
     void moveAlert();
     void firstMoveAlert();
+    void secondMoveAlert();
     void excessiveMoveAlert();
     void resetAlertStatus();
     AlertStatus getAlertStatus();

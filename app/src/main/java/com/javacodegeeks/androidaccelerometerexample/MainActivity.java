@@ -12,40 +12,39 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
-import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.javacodegeeks.androidaccelerometerexample.detector.AlertState;
 import com.javacodegeeks.androidaccelerometerexample.detector.Alertable;
 import com.javacodegeeks.androidaccelerometerexample.detector.MovementDetector;
 import com.javacodegeeks.androidaccelerometerexample.push.PushNotifications;
 
-import java.util.Date;
 import java.util.Locale;
 
 
-public class MainActivity extends Activity implements SensorEventListener, TextToSpeech.OnInitListener, Alertable {
+public class MainActivity extends Activity implements SensorEventListener, TextToSpeech.OnInitListener {
     private final static String TAG = MainActivity.class.getSimpleName();
     private SensorManager sensorManager;
-    private Vibrator v;
+    public Vibrator v;
     private TextToSpeech ttsobj;
-    private MeteorConnection mMeteor;
-    private GpsMonitor gpsMonitor;
-    private boolean isProduction = false;
-    private PBullet pbullet;
+    public MeteorConnection mMeteor;
+    public GpsMonitor gpsMonitor;
+    public boolean isProduction = false;
+    public PBullet pbullet;
     private PowerManager.WakeLock mWakeLock;
     public MovementDetector movementDetector;
-    private TextView countView, alertStatusView;
+    public TextView countView, alertStatusView;
     private int count;
-    private AlertStatus alertStatus;
+    public AlertState alertState;
+
     private TextView excessiveAlertStatusView;
     private Handler mHandler;
-    private ToneGenerator toneGenerator;
-    private Button btnConnectDisconnect;
-    private boolean autoSiren = false;
-    private final String PHONE_NUMBER = "+15125778778";
+    public ToneGenerator toneGenerator;
+    private Button coolButton;
+    public boolean autoSiren = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,7 +63,8 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         (new PushNotifications(getApplicationContext(), this)).runRegisterInBackground();
 
         count = 0;
-        alertStatus = AlertStatus.UNTRIGGERED;
+
+        alertState = new AlertState(this);
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         ttsobj = new TextToSpeech(getApplicationContext(), this);
         mMeteor = new MeteorConnection(this);
@@ -78,24 +78,19 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         countView = (TextView) findViewById(R.id.count);
         alertStatusView = (TextView) findViewById(R.id.alertStatus);
         excessiveAlertStatusView = (TextView) findViewById(R.id.excessiveAlertStatus);
-        movementDetector = new MovementDetector(this);
+        movementDetector = new MovementDetector(alertState);
         startExcessiveAlertStatusUpdate();
         Utils.postReqThread(Utils.METEOR_URL + "/phonestart");
 
         toneGenerator = new ToneGenerator();
-        btnConnectDisconnect=(Button) this.findViewById(R.id.btn_select);
-        btnConnectDisconnect.setOnClickListener(new View.OnClickListener() {
+        coolButton=(Button) this.findViewById(R.id.btn_select);
+        coolButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toneGenerator.toggle();
+                Log.d(TAG, "clicked");
             }
         });
 
-    }
-
-    @Override
-    public AlertStatus getAlertStatus() {
-        return alertStatus;
     }
 
     @Override
@@ -129,7 +124,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
             Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/prodOn/false");
             Log.d(TAG, "PRODUCTION OFF");
         } else if (intentText.equals("alarm-reset")) {
-            resetAlertStatus();
+            alertState.resetAlertStatus();
         } else if (intentText.equals("auto-siren-on")) {
             autoSiren = true;
             Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/true");
@@ -145,17 +140,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         Utils.postReqThread(Utils.METEOR_URL + "/tts-received"); // TODO + "/" + intentText .. read that in meteor
     }
 
-    public void setAlertStatus(AlertStatus a) {
-        alertStatus = a;
-        if (a != AlertStatus.UNTRIGGERED) {
-            gpsMonitor.gpsOn();
-        } else {
-            gpsMonitor.gpsOff();
-            movementDetector.reset();
-            excessiveAlertStatusView.setText("Need first bump");
-        }
-        updateAlertStatusView();
-    }
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -169,62 +154,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
         countView.setText(Integer.toString(count));
     }
 
-    @Override
-    public void resetAlertStatus() {
-        setAlertStatus(AlertStatus.UNTRIGGERED);
-        movementDetector.setSensitivity((float) 1.0);
-        autoSiren = false;
-        Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/false");
-    }
 
-    @Override
-    public void noMoveAlert() {
-        toneGenerator.stop();
-    }
-
-    @Override
-    public void moveAlert() {
-        if (autoSiren) {
-            Log.d(TAG, "play!");
-            toneGenerator.play();
-        }
-    }
-
-    @Override
-    public void firstMoveAlert() {
-
-        if (alertStatus == AlertStatus.UNTRIGGERED) {
-            setAlertStatus(AlertStatus.MINI);
-            Log.d(TAG, "Sending mini alert.");
-
-            if (isProduction) {
-                Date date = new Date();
-                pbullet.send("MiniAlert: Phone moved once.", "At " + date.toString());
-            } else {
-                v.vibrate(50);
-            }
-        }
-    }
-
-    @Override
-    public void excessiveMoveAlert() {
-        if (AlertStatus.MINI.compareTo(alertStatus) >= 0) {
-            excessiveAlertStatusView.setText("Triggered!");
-            setAlertStatus(AlertStatus.EXCESSIVE);
-            Log.d(TAG, "excessiveMoveAlert.");
-            movementDetector.setHighSensitivity();
-            autoSiren = true;
-            Utils.postReqThread(Utils.METEOR_URL + "/setGlobalState/autoSirenOn/true");
-            if (isProduction) {
-                mMeteor.alarmTrigger();
-                Date date = new Date();
-                pbullet.send("Phone moved LOTS!", "At " + date.toString());
-                SmsManager.getDefault().sendTextMessage(PHONE_NUMBER, null, "Phone moved LOTS -- " + date.toString(), null, null);
-            } else {
-                v.vibrate(500);
-            }
-        }
-    }
 
     @Override
     public void onDestroy() {
@@ -256,16 +186,12 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                if (Alertable.AlertStatus.MINI == alertStatus) {
-                                    long timeLeftToAlert = movementDetector.timeLeftToAlertIfAdded(System.currentTimeMillis());
-                                    if (timeLeftToAlert > 0) {
-                                        excessiveAlertStatusView.setText("Second bump trigger until " + timeLeftToAlert);
-                                    } else if (timeLeftToAlert == -999) {
-                                        excessiveAlertStatusView.setText("Need first bump");
-                                        resetAlertStatus();
-                                    } else {
-                                        excessiveAlertStatusView.setText("Require second bump in " + timeLeftToAlert);
-                                    }
+                                if (alertState.getAlertStatus() == Alertable.AlertStatus.UNTRIGGERED) {
+                                    excessiveAlertStatusView.setText("Already untriggered");
+                                } else if (alertState.getAlertStatus() == Alertable.AlertStatus.EXCESSIVE_ALERT) {
+                                    excessiveAlertStatusView.setText("Manual reset needed in EXCESSIVE_ALERT");
+                                } else {
+                                    excessiveAlertStatusView.setText("" + alertState.timeTillReset());
                                 }
                             }
                         });
@@ -275,19 +201,5 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
                 }
             }
         }).start();
-    }
-
-    private void updateAlertStatusView() {
-        switch (alertStatus) {
-            case UNTRIGGERED:
-                alertStatusView.setText("Untriggered");
-                break;
-            case MINI:
-                alertStatusView.setText("Small amount of movement");
-                break;
-            case EXCESSIVE:
-                alertStatusView.setText("Excessive movement");
-                break;
-        }
     }
 }

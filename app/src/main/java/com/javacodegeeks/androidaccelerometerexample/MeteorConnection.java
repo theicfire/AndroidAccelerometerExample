@@ -103,7 +103,7 @@ public class MeteorConnection implements MeteorCallback {
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
-                    if (activity.getAlertStatus() != Alertable.AlertStatus.UNTRIGGERED) {
+                    if (activity.alertState.getAlertStatus() != Alertable.AlertStatus.UNTRIGGERED) {
                         if (mMeteor.isConnected()) {
                             Log.d(TAG, "connected, sending data");
                             Map<String, Object> insertValues = new HashMap<String, Object>();
